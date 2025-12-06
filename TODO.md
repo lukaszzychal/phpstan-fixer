@@ -148,6 +148,25 @@ rules:
 - [ ] Add validation for configuration
 - [ ] Add documentation for configuration
 
+## Known Issues / Bugs to Fix
+
+### PhpParser API Compatibility
+- **Status**: Not fixed
+- **Priority**: High
+- **Description**: Tests are failing due to PhpParser API issues:
+  - `PhpParser\ParserFactory::create()` method does not exist (may be version mismatch)
+  - Error: "Call to undefined method PhpParser\ParserFactory::create()"
+  - ParseError in DocblockManipulator.php line 85: "Unclosed '{' on line 20 does not match ')'"
+- **Affected files**:
+  - `src/PhpstanFixer/CodeAnalysis/PhpFileAnalyzer.php` (line 38)
+  - `src/PhpstanFixer/CodeAnalysis/DocblockManipulator.php` (line 85)
+- **Impact**: 44 test errors out of 64 tests
+- **Action needed**: 
+  - [ ] Verify PhpParser version compatibility (require `^5.0` but actual API may differ)
+  - [ ] Update PhpParser usage to match current API
+  - [ ] Fix DocblockManipulator parsing logic
+  - [ ] Ensure all tests pass after fixes
+
 ## Notes
 
 - See `IMPLEMENTED_FIXERS.md` for complete comparison
