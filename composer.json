@@ -2,7 +2,6 @@
     "name": "lukaszzychal/phpstan-fixer",
     "description": "Framework-agnostic PHP library for automatically fixing PHPStan errors using static analysis",
     "type": "library",
-    "version": "1.0.0",
     "keywords": [
         "phpstan",
         "static-analysis",
