@@ -143,10 +143,13 @@ final class AutoFixService
             }
 
             // Get unfixed issues
+            // Note: Use $result->getIssue() instead of $fileIssues[$index] because
+            // fixIssues() sorts issues by line number (descending), which reorders them.
+            // Using array indices would map to wrong issues.
             $unfixedIssues = [];
-            foreach ($fixResults as $index => $result) {
+            foreach ($fixResults as $result) {
                 if (!$result->isSuccessful()) {
-                    $unfixedIssues[] = $fileIssues[$index];
+                    $unfixedIssues[] = $result->getIssue();
                 }
             }
 
