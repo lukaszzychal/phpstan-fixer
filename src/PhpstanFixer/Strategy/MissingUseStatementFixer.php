@@ -125,11 +125,11 @@ final class MissingUseStatementFixer implements FixStrategyInterface
         
         // Add blank line before if needed
         if ($insertIndex > 0 && trim($lines[$insertIndex - 1]) !== '') {
-            array_splice($lines, $insertIndex, 0, '');
+            array_splice($lines, $insertIndex, 0, ['']);
             $insertIndex++;
         }
         
-        array_splice($lines, $insertIndex, 0, $useStatement);
+        array_splice($lines, $insertIndex, 0, [$useStatement]);
 
         $fixedContent = implode("\n", $lines);
         

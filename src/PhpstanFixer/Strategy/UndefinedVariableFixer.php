@@ -71,18 +71,17 @@ final class UndefinedVariableFixer implements FixStrategyInterface
         $insertIndex = $targetIndex;
         if ($targetIndex > 0) {
             $prevLine = trim($lines[$targetIndex - 1]);
-            // If previous line is empty or just whitespace, insert there
+            // If previous line is empty or just whitespace, replace it with annotation
             if ($prevLine === '' || ctype_space($prevLine)) {
-                $insertIndex = $targetIndex;
-                // Replace empty line with annotation
-                $lines[$insertIndex] = $varAnnotation;
+                // Replace empty line with annotation (use $targetIndex - 1, not $targetIndex)
+                $lines[$targetIndex - 1] = $varAnnotation;
             } else {
                 // Insert before target line
-                array_splice($lines, $targetIndex, 0, $varAnnotation);
+                array_splice($lines, $targetIndex, 0, [$varAnnotation]);
             }
         } else {
             // Insert at the beginning
-            array_splice($lines, 0, 0, $varAnnotation);
+            array_splice($lines, 0, 0, [$varAnnotation]);
         }
 
         $fixedContent = implode("\n", $lines);
