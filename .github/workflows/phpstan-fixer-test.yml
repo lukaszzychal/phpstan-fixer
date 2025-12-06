@@ -1,0 +1,42 @@
+name: Test PHPStan Fixer on Itself
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday
+
+jobs:
+  self-test:
+    name: Test PHPStan Fixer on Its Own Code
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, json
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Run PHPStan on project
+        run: vendor/bin/phpstan analyse src tests --error-format=json --no-progress > phpstan-output.json || true
+
+      - name: Run PHPStan Fixer (suggest mode)
+        run: vendor/bin/phpstan-fixer --input=phpstan-output.json --mode=suggest
+
+      - name: Check if any issues were found
+        run: |
+          if [ -s phpstan-output.json ]; then
+            echo "PHPStan found issues. Checking if fixer can handle them..."
+            # Count issues
+            ISSUES=$(php -r "echo count(json_decode(file_get_contents('phpstan-output.json'), true)['files'] ?? []);")
+            echo "Found $ISSUES file(s) with issues"
+          else
+            echo "No PHPStan issues found - great!"
+          fi
+

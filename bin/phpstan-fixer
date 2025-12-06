@@ -1,0 +1,30 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Copyright (c) 2025 Łukasz Zychal
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+/**
+ * PHPStan Auto-Fix CLI Tool
+ *
+ * Framework-agnostic tool for automatically fixing PHPStan errors.
+ *
+ * @author Łukasz Zychal <lukasz@zychal.pl>
+ */
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use PhpstanFixer\Command\PhpstanAutoFixCommand;
+use Symfony\Component\Console\Application;
+
+$application = new Application('PHPStan Auto-Fix', '1.0.0');
+$application->add(new PhpstanAutoFixCommand());
+$application->setDefaultCommand('phpstan:auto-fix', true);
+$application->run();
+

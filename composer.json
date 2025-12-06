@@ -1,0 +1,61 @@
+{
+    "name": "lukaszzychal/phpstan-fixer",
+    "description": "Framework-agnostic PHP library for automatically fixing PHPStan errors using static analysis",
+    "type": "library",
+    "version": "1.0.0",
+    "keywords": [
+        "phpstan",
+        "static-analysis",
+        "code-fixer",
+        "phpdoc",
+        "automation",
+        "code-quality",
+        "php"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Łukasz Zychal",
+            "email": "lukasz@zychal.pl",
+            "homepage": "https://github.com/lukaszzychal",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://github.com/lukaszzychal/phpstan-fixer",
+    "support": {
+        "issues": "https://github.com/lukaszzychal/phpstan-fixer/issues",
+        "source": "https://github.com/lukaszzychal/phpstan-fixer"
+    },
+    "require": {
+        "php": "^8.0",
+        "ext-json": "*",
+        "nikic/php-parser": "^5.0",
+        "symfony/console": "^6.0|^7.0"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.10",
+        "phpunit/phpunit": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhpstanFixer\\": "src/PhpstanFixer/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PhpstanFixer\\Tests\\": "tests/"
+        }
+    },
+    "bin": [
+        "bin/phpstan-fixer"
+    ],
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
+
