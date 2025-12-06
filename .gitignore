@@ -1,0 +1,10 @@
+/vendor/
+/.phpunit.cache/
+composer.lock
+.phpunit.result.cache
+*.log
+.DS_Store
+coverage.xml
+phpstan-output.json
+.phpstan/
+
