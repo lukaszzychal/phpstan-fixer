@@ -115,6 +115,39 @@ These errors cannot be safely fixed automatically as they require changing code 
 5. **TypeCoercionFixer** - Requires code refactoring
 6. **InvalidArgumentFixer** - Requires changing function calls
 
+## Configuration System (v1.1.0+)
+
+### Per-Error Configuration
+Allow users to configure how each error type should be handled:
+
+1. **Fix** (default) - Attempt to automatically fix the error
+2. **Ignore** - Don't fix and don't display the error at all (silent ignore)
+3. **Report** - Don't fix, but display in original PHPStan format
+
+**Configuration file format** (phpstan-fixer.yaml):
+```yaml
+rules:
+  "Access to an undefined property":
+    action: "fix"  # or "ignore" or "report"
+  
+  "Method has no return type":
+    action: "fix"
+  
+  "Unknown class":
+    action: "ignore"  # Skip fixing, don't show
+  
+  "Extra arguments":
+    action: "report"  # Don't fix, but show in output
+```
+
+**Implementation tasks:**
+- [ ] Create configuration file parser
+- [ ] Add configuration loading to AutoFixService
+- [ ] Implement ignore action (skip processing)
+- [ ] Implement report action (pass through to output)
+- [ ] Add validation for configuration
+- [ ] Add documentation for configuration
+
 ## Notes
 
 - See `IMPLEMENTED_FIXERS.md` for complete comparison

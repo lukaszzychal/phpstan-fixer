@@ -4,6 +4,15 @@ This document captures creative ideas and potential enhancements for PHPStan Fix
 
 ## Core Functionality
 
+### Per-Error Configuration System
+- Configure how each error type should be handled:
+  - **Fix** (default) - Attempt automatic fix
+  - **Ignore** - Silent ignore (don't fix, don't display)
+  - **Report** - Pass through without fixing (show in output)
+- YAML/JSON configuration file support
+- Pattern matching for error messages (exact, regex, wildcard)
+- Per-file or per-directory configuration rules
+
 ### Smarter Type Inference
 - Instead of always using `mixed`, try to infer types from:
   - Variable assignments

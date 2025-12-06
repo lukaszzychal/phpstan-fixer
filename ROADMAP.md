@@ -9,11 +9,16 @@ This document outlines future plans and ideas for PHPStan Fixer.
 - [ ] **ReadonlyPropertyFixer** - Add `@readonly` tag support (PHP < 8.1)
 - [ ] **PrefixedTagsFixer** - Support `@phpstan-param`, `@phpstan-return` for advanced types
 - [ ] **Improved MissingUseStatementFixer** - Better FQN resolution with symbol discovery
+- [ ] **Per-Error Configuration System** - Configure how each error type is handled:
+  - Fix (default) - Attempt automatic fix
+  - Ignore - Silent ignore (don't fix, don't display)
+  - Report - Pass through to output without fixing
 
 ### Medium Priority
 - [ ] **ArrayOffsetTypeFixer** - Add generics to array types (Level 5)
 - [ ] **IterableValueTypeFixer** - Add value types to iterable (Level 5)
 - [ ] **CLI Command tests** - Add comprehensive command testing
+- [ ] **Configuration file** - YAML/JSON config file support (`phpstan-fixer.yaml`)
 
 ## Version 1.2.0 (Medium-term)
 

@@ -128,7 +128,7 @@ The project is **ready for v1.0.0 release**!
 1. **Gather feedback** from early users
 2. **Implement high-priority fixers** from TODO.md
 3. **Improve MissingUseStatementFixer** with symbol discovery
-4. **Add configuration file** support
+4. **Add per-error configuration system** (fix/ignore/report actions) - See CONFIGURATION_FEATURE.md
 5. **Expand test coverage** to 80%+
 
 ---
