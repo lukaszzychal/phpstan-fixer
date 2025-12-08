@@ -1,0 +1,12 @@
+---
+description: "Project-wide scope and general guidelines"
+globs: ["**/*"]
+alwaysApply: true
+---
+
+## Scope
+- Project-wide guidance for phpstan-fixer repository
+- Apply when working in this repo; nest more specific rules in subdirectories if needed
+- Follow PSR-12, `declare(strict_types=1);`, helpful PHPDoc
+- Keep responses concise and focused on the requested change
+- Prefer minimal, incremental edits; avoid speculative changes
