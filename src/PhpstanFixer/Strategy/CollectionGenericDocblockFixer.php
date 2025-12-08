@@ -62,6 +62,7 @@ final class CollectionGenericDocblockFixer implements FixStrategyInterface
                 // Found Collection without generics
                 $annotationType = $matches[1];
                 // Offset 2 may not exist if there's no namespace prefix before Collection
+                /** @phpstan-ignore-next-line */
                 $collectionType = $matches[2] ?? '';
                 $fullMatch = $matches[0];
 
