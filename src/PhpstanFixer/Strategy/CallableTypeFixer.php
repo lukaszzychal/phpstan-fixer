@@ -19,7 +19,7 @@ use PhpstanFixer\Issue;
 /**
  * Fixes callable type issues by adding proper callable invocation annotations.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class CallableTypeFixer implements FixStrategyInterface
 {

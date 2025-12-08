@@ -19,7 +19,7 @@ use PhpstanFixer\Issue;
 /**
  * Fixes undefined method errors by adding @method annotation.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class UndefinedMethodFixer implements FixStrategyInterface
 {

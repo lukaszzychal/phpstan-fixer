@@ -17,7 +17,7 @@ use PhpstanFixer\Issue;
 /**
  * Fixes undefined variable errors by adding inline @var annotation.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class UndefinedVariableFixer implements FixStrategyInterface
 {

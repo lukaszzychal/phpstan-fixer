@@ -15,6 +15,8 @@
  * file that was distributed with this source code.
  */
 
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
+
 declare(strict_types=1);
 
 namespace PhpstanFixer\Tests\Unit\CodeAnalysis;

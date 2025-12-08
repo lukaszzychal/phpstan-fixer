@@ -14,7 +14,7 @@ namespace PhpstanFixer;
 /**
  * Value object representing a single PHPStan error/issue.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class Issue
 {

@@ -18,7 +18,7 @@ use PhpstanFixer\Issue;
  * Interface for all fix strategies.
  * Each fixer implements this interface to handle specific types of PHPStan errors.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 interface FixStrategyInterface
 {

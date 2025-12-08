@@ -19,7 +19,7 @@ use PhpstanFixer\Issue;
 /**
  * Fixes missing parameter type annotations by adding @param mixed.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class MissingParamDocblockFixer implements FixStrategyInterface
 {
