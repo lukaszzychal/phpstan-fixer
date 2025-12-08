@@ -32,6 +32,7 @@
         "symfony/console": "^6.0|^7.0"
     },
     "require-dev": {
+        "lukaszzychal/php-compatibility-tester": "^1.1",
         "phpstan/phpstan": "^1.10 || ^2.0",
         "phpunit/phpunit": "^10.0"
     },
@@ -57,4 +58,3 @@
     "minimum-stability": "stable",
     "prefer-stable": true
 }
-

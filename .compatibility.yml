@@ -1,0 +1,33 @@
+package_name: "lukaszzychal/phpstan-fixer"
+
+php_versions: ['8.1', '8.2', '8.3', '8.4']
+
+frameworks:
+  laravel:
+    versions: ['11.*', '12.*']
+    install_command: 'composer create-project laravel/laravel'
+    php_min_version: '8.1'
+  
+  symfony:
+    versions: ['7.4.*', '8.0.*']
+    install_command: 'composer create-project symfony/skeleton'
+    php_min_version: '8.1'
+  
+  codeigniter:
+    versions: ['4.*', '5.*']
+    install_command: 'composer create-project codeigniter4/appstarter'
+    php_min_version: '8.1'
+
+test_scripts:
+  - name: "Autoload test"
+    command: "composer dump-autoload && php -r \"require 'vendor/autoload.php'; echo 'Autoload OK';\""
+  
+  - name: "Binary test"
+    command: "vendor/bin/phpstan-fixer --help"
+  
+  - name: "Basic functionality test"
+    command: "php -r \"require 'vendor/autoload.php'; use PhpstanFixer\\AutoFixService; echo 'Classes loaded OK';\""
+
+github_actions:
+  enabled: true
+

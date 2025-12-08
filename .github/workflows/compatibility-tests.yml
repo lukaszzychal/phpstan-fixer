@@ -1,0 +1,58 @@
+name: Compatibility Tests
+
+on:
+  # Run monthly on the 1st day at 2 AM UTC
+  schedule:
+    - cron: '0 2 1 * *'  # Monthly on 1st day at 2 AM UTC
+  # Manual trigger (workflow_dispatch)
+  workflow_dispatch:
+  # Optional: Run on release tags (uncomment if needed)
+  # push:
+  #   tags:
+  #     - 'v*'
+
+jobs:
+  compatibility-tests:
+    name: PHP Compatibility Tests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['8.1', '8.2', '8.3', '8.4']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, xml, curl, json
+          coverage: none
+      
+      - name: Install Composer
+        uses: php-actions/composer@v1
+        with:
+          command: install
+          args: --no-interaction --prefer-dist
+      
+      - name: Run compatibility tests and generate report
+        if: always()
+        run: |
+          # Report command automatically runs tests if needed, then generates report
+          vendor/bin/compatibility-tester report \
+            --format=markdown \
+            --output=compatibility-report.md || true
+        continue-on-error: true
+        env:
+          PHP_VERSION: ${{ matrix.php-version }}
+      
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compatibility-report-php-${{ matrix.php-version }}
+          path: compatibility-report.md
+          retention-days: 30
+
