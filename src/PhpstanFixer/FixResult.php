@@ -110,5 +110,47 @@ final class FixResult
     {
         return $this->successful && $this->fixedContent !== '';
     }
+
+    /**
+     * Check if this result represents an ignored issue.
+     */
+    public function isIgnored(): bool
+    {
+        return !$this->successful && $this->description === 'ignored';
+    }
+
+    /**
+     * Check if this result represents a reported issue (not fixed, but should be shown).
+     */
+    public function isReported(): bool
+    {
+        return !$this->successful && $this->description === 'reported';
+    }
+
+    /**
+     * Create an ignored result (issue was ignored by configuration).
+     */
+    public static function ignored(Issue $issue, string $originalContent): self
+    {
+        return new self(
+            $issue,
+            false,
+            $originalContent,
+            'ignored'
+        );
+    }
+
+    /**
+     * Create a reported result (issue should be shown but not fixed).
+     */
+    public static function reported(Issue $issue, string $originalContent): self
+    {
+        return new self(
+            $issue,
+            false,
+            $originalContent,
+            'reported'
+        );
+    }
 }
 

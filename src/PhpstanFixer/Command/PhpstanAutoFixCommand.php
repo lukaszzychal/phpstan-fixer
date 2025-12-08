@@ -14,6 +14,8 @@ namespace PhpstanFixer\Command;
 use PhpstanFixer\AutoFixService;
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
+use PhpstanFixer\Configuration\Configuration;
+use PhpstanFixer\Configuration\ConfigurationLoader;
 use PhpstanFixer\PhpstanLogParser;
 use PhpstanFixer\Strategy\CallableTypeFixer;
 use PhpstanFixer\Strategy\CollectionGenericDocblockFixer;
@@ -78,6 +80,12 @@ final class PhpstanAutoFixCommand extends Command
                 's',
                 InputOption::VALUE_OPTIONAL,
                 'Apply only specific fixer strategy (optional filter)'
+            )
+            ->addOption(
+                'config',
+                'c',
+                InputOption::VALUE_OPTIONAL,
+                'Path to configuration file (phpstan-fixer.yaml or phpstan-fixer.json). If omitted, will search for config file automatically.'
             );
     }
 
@@ -86,7 +94,11 @@ final class PhpstanAutoFixCommand extends Command
         $io = new SymfonyStyle($input, $output);
         
         $parser = $this->parser ?? new PhpstanLogParser();
-        $autoFixService = $this->autoFixService ?? $this->createDefaultAutoFixService();
+        
+        // Load configuration if specified or found
+        $configuration = $this->loadConfiguration($input->getOption('config'), $io);
+        
+        $autoFixService = $this->autoFixService ?? $this->createDefaultAutoFixService($configuration);
 
         $inputPath = $input->getOption('input');
         $mode = $input->getOption('mode');
@@ -228,6 +240,15 @@ final class PhpstanAutoFixCommand extends Command
             $io->note('Run with --mode=apply to apply these changes');
         }
 
+        // Display reported issues (from configuration)
+        $reportedIssues = $this->getReportedIssues($results);
+        if (!empty($reportedIssues)) {
+            $io->section('Reported Issues (not fixed per configuration)');
+            $io->note(sprintf('%d issue(s) are reported but not fixed (per configuration):', count($reportedIssues)));
+            
+            $this->displayUnfixedIssues($reportedIssues, $io);
+        }
+
         // Display unfixed issues in PHPStan format
         $unfixedIssues = $autoFixService->getUnfixedIssues($results);
         if (!empty($unfixedIssues)) {
@@ -236,6 +257,25 @@ final class PhpstanAutoFixCommand extends Command
             
             $this->displayUnfixedIssues($unfixedIssues, $io);
         }
+    }
+
+    /**
+     * Get reported issues from results.
+     *
+     * @param array<string, array<string, mixed>> $results Results from fixAllIssues
+     * @return \PhpstanFixer\Issue[] Array of reported issues
+     */
+    private function getReportedIssues(array $results): array
+    {
+        $reportedIssues = [];
+
+        foreach ($results as $fileResults) {
+            foreach ($fileResults['reportedIssues'] ?? [] as $issue) {
+                $reportedIssues[] = $issue;
+            }
+        }
+
+        return $reportedIssues;
     }
 
     /**
@@ -272,9 +312,37 @@ final class PhpstanAutoFixCommand extends Command
     }
 
     /**
+     * Load configuration from file or auto-discover.
+     */
+    private function loadConfiguration(?string $configPath, SymfonyStyle $io): ?Configuration
+    {
+        $loader = new ConfigurationLoader();
+        
+        try {
+            if ($configPath !== null) {
+                // Explicit config path provided
+                $io->info("Loading configuration from: {$configPath}");
+                return $loader->loadFromFile($configPath);
+            }
+            
+            // Try to auto-discover config file
+            $foundPath = $loader->findConfigurationFile();
+            if ($foundPath !== null) {
+                $io->info("Found configuration file: {$foundPath}");
+                return $loader->loadFromFile($foundPath);
+            }
+        } catch (\Exception $e) {
+            $io->warning("Failed to load configuration: " . $e->getMessage());
+            $io->note("Continuing with default configuration (all errors will be fixed)");
+        }
+        
+        return null;
+    }
+
+    /**
      * Create default AutoFixService with all strategies.
      */
-    private function createDefaultAutoFixService(): AutoFixService
+    private function createDefaultAutoFixService(?Configuration $configuration = null): AutoFixService
     {
         $analyzer = new PhpFileAnalyzer();
         $docblockManipulator = new DocblockManipulator();
@@ -292,7 +360,7 @@ final class PhpstanAutoFixCommand extends Command
             new CallableTypeFixer($analyzer, $docblockManipulator),
         ];
 
-        return new AutoFixService($strategies);
+        return new AutoFixService($strategies, $configuration);
     }
 }
 

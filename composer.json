@@ -31,6 +31,10 @@
         "nikic/php-parser": "^5.0",
         "symfony/console": "^6.0|^7.0"
     },
+    "suggest": {
+        "ext-yaml": "For YAML configuration file support",
+        "symfony/yaml": "Alternative YAML parser if ext-yaml is not available"
+    },
     "require-dev": {
         "lukaszzychal/php-compatibility-tester": "^1.1",
         "phpstan/phpstan": "^1.10 || ^2.0",

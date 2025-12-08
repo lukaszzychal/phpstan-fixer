@@ -40,20 +40,20 @@ else
     echo -e "${YELLOW}⚠️  phpstan-fixer not found, skipping...${NC}"
 fi
 
-# 2. Run PHPStan
-echo -e "${YELLOW}📋 Step 2/3: Running PHPStan static analysis...${NC}"
-if [ -f "vendor/bin/phpstan" ]; then
-    if ! vendor/bin/phpstan analyse src tests --level=5 --error-format=github > /tmp/phpstan-output.txt 2>&1; then
-        echo -e "${RED}❌ PHPStan found errors!${NC}"
-        cat /tmp/phpstan-output.txt
-        rm -f /tmp/phpstan-output.txt
-        exit 1
-    fi
-    echo -e "${GREEN}✅ PHPStan: No errors found${NC}"
-    rm -f /tmp/phpstan-output.txt
-else
-    echo -e "${YELLOW}⚠️  PHPStan not found, skipping...${NC}"
-fi
+            # 2. Run PHPStan
+            echo -e "${YELLOW}📋 Step 2/3: Running PHPStan static analysis...${NC}"
+            if [ -f "vendor/bin/phpstan" ]; then
+                if ! vendor/bin/phpstan analyse src tests --level=5 --error-format=github --memory-limit=512M > /tmp/phpstan-output.txt 2>&1; then
+                    echo -e "${RED}❌ PHPStan found errors!${NC}"
+                    cat /tmp/phpstan-output.txt
+                    rm -f /tmp/phpstan-output.txt
+                    exit 1
+                fi
+                echo -e "${GREEN}✅ PHPStan: No errors found${NC}"
+                rm -f /tmp/phpstan-output.txt
+            else
+                echo -e "${YELLOW}⚠️  PHPStan not found, skipping...${NC}"
+            fi
 
 # 3. Run PHPUnit tests
 echo -e "${YELLOW}📋 Step 3/3: Running PHPUnit tests...${NC}"
