@@ -38,7 +38,7 @@ final class PhpFileAnalyzerTest extends TestCase
         $ast = $this->analyzer->parse($code);
 
         $this->assertNotNull($ast);
-        $this->assertIsArray($ast);
+        $this->assertIsArray($ast); // @phpstan-ignore-line - PhpParser returns array|null
     }
 
     public function testParseInvalidPHP(): void

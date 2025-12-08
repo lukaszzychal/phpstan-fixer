@@ -11,7 +11,6 @@ declare(strict_types=1);
 
 namespace PhpstanFixer\Strategy;
 
-use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 
@@ -22,9 +21,8 @@ use PhpstanFixer\Issue;
  */
 final class UndefinedVariableFixer implements FixStrategyInterface
 {
-    public function __construct(
-        private readonly DocblockManipulator $docblockManipulator
-    ) {
+    public function __construct()
+    {
     }
 
     public function canFix(Issue $issue): bool

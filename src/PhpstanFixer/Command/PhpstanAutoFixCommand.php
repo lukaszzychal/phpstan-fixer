@@ -241,7 +241,7 @@ final class PhpstanAutoFixCommand extends Command
     /**
      * Display unfixed issues in PHPStan-like format.
      *
-     * @param Issue[] $issues
+     * @param \PhpstanFixer\Issue[] $issues
      */
     private function displayUnfixedIssues(array $issues, SymfonyStyle $io): void
     {
@@ -285,7 +285,7 @@ final class PhpstanAutoFixCommand extends Command
             new MissingPropertyDocblockFixer($analyzer, $docblockManipulator),
             new CollectionGenericDocblockFixer($analyzer, $docblockManipulator),
             new UndefinedPivotPropertyFixer($analyzer, $docblockManipulator),
-            new UndefinedVariableFixer($docblockManipulator),
+            new UndefinedVariableFixer(),
             new MissingUseStatementFixer($analyzer),
             new UndefinedMethodFixer($analyzer, $docblockManipulator),
             new MissingThrowsDocblockFixer($analyzer, $docblockManipulator),

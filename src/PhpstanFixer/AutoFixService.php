@@ -24,7 +24,7 @@ final class AutoFixService
      * @param FixStrategyInterface[] $strategies Array of fix strategies to use
      */
     public function __construct(
-        private readonly array $strategies = []
+        private array $strategies = []
     ) {
     }
 
