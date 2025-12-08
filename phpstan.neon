@@ -5,6 +5,4 @@ parameters:
         - tests
     excludePaths:
         - tests/Fixtures
-    checkMissingIterableValueType: false
-    checkGenericClassInNonGenericObjectType: false
 
