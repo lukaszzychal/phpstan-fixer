@@ -214,6 +214,8 @@ final class PhpstanAutoFixCommand extends Command
                 ['Files Fixed', $stats['files_fixed']],
                 ['Total Issues', $stats['total_issues']],
                 ['Issues Fixed', $stats['issues_fixed']],
+                ['Issues Ignored', $stats['issues_ignored'] ?? 0],
+                ['Issues Reported', $stats['issues_reported'] ?? 0],
                 ['Issues Failed', $stats['issues_failed']],
             ]
         );
@@ -241,7 +243,7 @@ final class PhpstanAutoFixCommand extends Command
         }
 
         // Display reported issues (from configuration)
-        $reportedIssues = $this->getReportedIssues($results);
+        $reportedIssues = $autoFixService->getReportedIssues($results);
         if (!empty($reportedIssues)) {
             $io->section('Reported Issues (not fixed per configuration)');
             $io->note(sprintf('%d issue(s) are reported but not fixed (per configuration):', count($reportedIssues)));
@@ -257,25 +259,13 @@ final class PhpstanAutoFixCommand extends Command
             
             $this->displayUnfixedIssues($unfixedIssues, $io);
         }
-    }
 
-    /**
-     * Get reported issues from results.
-     *
-     * @param array<string, array<string, mixed>> $results Results from fixAllIssues
-     * @return \PhpstanFixer\Issue[] Array of reported issues
-     */
-    private function getReportedIssues(array $results): array
-    {
-        $reportedIssues = [];
-
-        foreach ($results as $fileResults) {
-            foreach ($fileResults['reportedIssues'] ?? [] as $issue) {
-                $reportedIssues[] = $issue;
-            }
+        // Display ignored issues (informational)
+        $ignoredIssues = $autoFixService->getIgnoredIssues($results);
+        if (!empty($ignoredIssues)) {
+            $io->section('Ignored Issues');
+            $io->info(sprintf('%d issue(s) were ignored per configuration.', count($ignoredIssues)));
         }
-
-        return $reportedIssues;
     }
 
     /**
