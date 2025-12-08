@@ -117,7 +117,6 @@ JSON;
             return;
         }
 
-        /** @phpstan-ignore-next-line - PHPStan doesn't understand that markTestSkipped() may return */
         $yamlContent = <<<'YAML'
 rules:
   "Access to an undefined property":
@@ -142,7 +141,6 @@ YAML;
             return;
         }
 
-        /** @phpstan-ignore-next-line - PHPStan doesn't understand that markTestSkipped() may return */
         $yamlContent = <<<'YAML'
 rules:
   "Access to an undefined property":
