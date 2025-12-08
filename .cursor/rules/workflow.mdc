@@ -1,0 +1,13 @@
+---
+description: "Development workflow and tooling preferences"
+globs: ["**/*"]
+alwaysApply: true
+---
+
+## Workflow & Tooling
+- Use `apply_patch` for code edits; avoid destructive git commands
+- One logical change per commit/message; clear, descriptive commit messages
+- Use `@phpstan-ignore*` only with justification
+- Maintain PHPStan level 5 or higher; fix all errors before committing
+- Collect PHPStan errors for analysis: save to `log-errors-phpstan/` with timestamps
+- Follow conventional commits format when possible (feat:, fix:, refactor:, etc.)

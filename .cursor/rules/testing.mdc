@@ -1,0 +1,13 @@
+---
+description: "Testing guidelines and practices"
+globs: ["**/*"]
+alwaysApply: true
+---
+
+## Testing
+- Add/adjust tests when behavior changes or bugs are fixed
+- Run relevant suites (PHPUnit/PHPStan) when feasible; state when not run
+- Follow test structure: Arrange-Act-Assert pattern
+- Write descriptive test method names that explain what is being tested
+- Ensure unit tests for individual components and integration tests for interactions
+- Test edge cases and error conditions; all tests pass before committing

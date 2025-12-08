@@ -1,0 +1,13 @@
+---
+description: "Code quality and development standards"
+globs: ["**/*"]
+alwaysApply: true
+---
+
+## Coding Guidelines
+- Small, single-responsibility methods; prefer explicit types and named constants
+- Avoid duplication; extract shared logic when it improves clarity
+- Match existing fixer/test patterns for consistency
+- Use existing fixer/test patterns as reference; keep new fixers and tests consistent
+- Prioritize simplicity over cleverness; simple solutions are easier to maintain
+- Keep methods small (ideally < 20 lines); extract long methods into smaller ones
