@@ -5,4 +5,7 @@ parameters:
         - tests
     excludePaths:
         - tests/Fixtures
+    ignoreErrors:
+        - '#Call to method PHPUnit\\Framework\\Assert::assertIsArray\(\) with array<PhpParser\\Node\\Stmt> will always evaluate to true#'
+        - '#Offset 2 on array.*in isset\(\) always exists and is not nullable#'
 

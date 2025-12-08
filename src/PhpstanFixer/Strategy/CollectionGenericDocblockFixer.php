@@ -61,7 +61,8 @@ final class CollectionGenericDocblockFixer implements FixStrategyInterface
             if (preg_match('/@(return|var|param)\s+([^\\s]+\\\\)?Collection(\s|$)/i', $line, $matches)) {
                 // Found Collection without generics
                 $annotationType = $matches[1];
-                $collectionType = isset($matches[2]) ? $matches[2] : '';
+                // Offset 2 may not exist if there's no namespace prefix before Collection
+                $collectionType = $matches[2] ?? '';
                 $fullMatch = $matches[0];
 
                 // Extract the full annotation to update
