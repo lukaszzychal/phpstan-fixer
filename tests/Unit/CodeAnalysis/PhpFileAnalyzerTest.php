@@ -38,7 +38,6 @@ final class PhpFileAnalyzerTest extends TestCase
         $ast = $this->analyzer->parse($code);
 
         $this->assertNotNull($ast);
-        /** @phpstan-ignore-next-line - PhpParser returns array|null, but assertNotNull narrows type */
         $this->assertIsArray($ast);
     }
 
