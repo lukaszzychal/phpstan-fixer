@@ -46,7 +46,7 @@ final class EndToEndFixTest extends TestCase
             new MissingPropertyDocblockFixer($analyzer, $docblockManipulator),
             new CollectionGenericDocblockFixer($analyzer, $docblockManipulator),
             new UndefinedPivotPropertyFixer($analyzer, $docblockManipulator),
-            new UndefinedVariableFixer($docblockManipulator),
+            new UndefinedVariableFixer(),
             new MissingUseStatementFixer($analyzer),
             new UndefinedMethodFixer($analyzer, $docblockManipulator),
             new MissingThrowsDocblockFixer($analyzer, $docblockManipulator),

@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 namespace PhpstanFixer\Tests\Unit\Strategy;
 
-use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\UndefinedVariableFixer;
 use PHPUnit\Framework\TestCase;
@@ -24,9 +23,7 @@ final class UndefinedVariableFixerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->fixer = new UndefinedVariableFixer(
-            new DocblockManipulator()
-        );
+        $this->fixer = new UndefinedVariableFixer();
     }
 
     public function testCanFixUndefinedVariable(): void

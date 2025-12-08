@@ -23,7 +23,8 @@ final class DocblockManipulator
      *
      * @param string[] $lines Array of file lines
      * @param int $lineIndex Index of the line (0-based) to check for docblock above
-     * @return array{content: string, startLine: int, endLine: int}|null Returns docblock info or null if not found
+     * @return array<string, mixed>|null Returns docblock info or null if not found
+     *                                    Format: ['content' => string, 'startLine' => int, 'endLine' => int]
      */
     public function extractDocblock(array $lines, int $lineIndex): ?array
     {
@@ -36,7 +37,8 @@ final class DocblockManipulator
         $docblockEnd = null;
 
         for ($i = $lineIndex - 1; $i >= 0; $i--) {
-            $line = trim($lines[$i]);
+            $rawLine = $lines[$i];
+            $line = trim($rawLine);
 
             // Found closing of docblock
             if ($line === '*/') {
@@ -51,17 +53,19 @@ final class DocblockManipulator
             }
 
             // If we hit a non-empty line that's not part of docblock, stop
-            if ($docblockEnd !== null && $line !== '' && !str_starts_with($line, ' *')) {
+            // Check raw line for ' *' pattern (not trimmed, as trim removes the space)
+            if ($docblockEnd !== null && $line !== '' && !str_starts_with(trim($rawLine, " \t"), '*')) {
                 break;
             }
 
             // If we're in a docblock but haven't found start, continue
-            if ($docblockEnd !== null && (str_starts_with($line, ' *') || $line === '')) {
+            // Check if line starts with '*' (docblock content line)
+            if ($docblockEnd !== null && (str_starts_with(trim($rawLine, " \t"), '*') || $line === '')) {
                 continue;
             }
 
             // Not a docblock line
-            if ($docblockEnd === null && !str_starts_with($line, ' *') && $line !== '') {
+            if ($docblockEnd === null && !str_starts_with(trim($rawLine, " \t"), '*') && $line !== '') {
                 break;
             }
         }
@@ -82,7 +86,7 @@ final class DocblockManipulator
     /**
      * Parse PHPDoc content into structured annotations.
      *
-     * @param string $docblockContent PHPDoc content (with /** and */)
+     * @param string $docblockContent PHPDoc content (with opening and closing markers)
      * @return array<string, array<int, array<string, mixed>>> Parsed annotations by type
      */
     public function parseDocblock(string $docblockContent): array

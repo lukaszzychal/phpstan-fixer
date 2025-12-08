@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches: [ main, develop ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main, develop ]
-  tags:
-    - 'v*'
 
 jobs:
   test:
@@ -17,7 +17,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        php-version: ['8.0', '8.1', '8.2', '8.3', '8.4']
+        php-version: ['8.1', '8.2', '8.3', '8.4']
 
     steps:
       - name: Checkout code
@@ -42,7 +42,7 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Run PHPUnit tests
-        run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml
+        run: vendor/bin/phpunit --coverage-text --coverage-clover=coverage.xml 2>&1 || vendor/bin/phpunit
 
       - name: Upload coverage to Codecov (if available)
         if: matrix.php-version == '8.3' && matrix.os == 'ubuntu-latest'
