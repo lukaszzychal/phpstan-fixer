@@ -7,5 +7,7 @@ parameters:
         - tests/Fixtures
     ignoreErrors:
         - '#Call to method.*assertIsArray\(\) with array.*will always evaluate to true#'
+        - '#Call to method.*assertIsBool\(\) with bool will always evaluate to true#'
+        - '#Call to method.*assertIsString\(\) with string will always evaluate to true#'
         - '#Unreachable statement - code above always terminates#'
     reportUnmatchedIgnoredErrors: false
