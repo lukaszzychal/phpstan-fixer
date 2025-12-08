@@ -18,7 +18,34 @@ declare(strict_types=1);
  * @author Łukasz Zychal <lukasz@zychal.pl>
  */
 
-require_once __DIR__ . '/../vendor/autoload.php';
+// Find the autoloader by traversing up the directory tree
+// This works both when package is standalone and when installed as dependency
+$autoloader = null;
+$dir = __DIR__;
+$maxDepth = 10; // Prevent infinite loops
+
+for ($i = 0; $i < $maxDepth; $i++) {
+    $possiblePath = $dir . '/vendor/autoload.php';
+    if (file_exists($possiblePath)) {
+        $autoloader = $possiblePath;
+        break;
+    }
+    
+    $parentDir = dirname($dir);
+    if ($parentDir === $dir) {
+        // Reached filesystem root
+        break;
+    }
+    $dir = $parentDir;
+}
+
+if ($autoloader === null) {
+    fwrite(STDERR, "Error: Could not find autoload.php.\n");
+    fwrite(STDERR, "Please run 'composer install' to install dependencies.\n");
+    exit(1);
+}
+
+require_once $autoloader;
 
 use PhpstanFixer\Command\PhpstanAutoFixCommand;
 use Symfony\Component\Console\Application;
