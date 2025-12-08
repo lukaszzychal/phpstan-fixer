@@ -157,6 +157,8 @@ For YAML configuration files, you need either:
 
 ## Supported Fix Strategies
 
+> 📖 **Detailed Guide**: See [PHPStan Fixers Guide](docs/PHPSTAN_FIXERS_GUIDE.md) for comprehensive documentation on each fixer, including problem descriptions, examples, and usage scenarios.
+
 The library automatically fixes the following types of PHPStan errors:
 
 1. **Missing Return Type** (`MissingReturnDocblockFixer`)
@@ -188,6 +190,9 @@ The library automatically fixes the following types of PHPStan errors:
 
 10. **Callable Type Invocation** (`CallableTypeFixer`)
     - Adds `@param-immediately-invoked-callable` or `@param-later-invoked-callable` annotations
+
+11. **Mixin Annotation** (`MixinFixer`)
+    - Adds `@mixin ClassName` annotation for classes using magic methods (`__call`, `__get`, `__set`) to delegate calls
 
 ## Examples
 

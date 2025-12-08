@@ -100,6 +100,7 @@ final class DocblockManipulator
             'property-read' => [],
             'property-write' => [],
             'method' => [],
+            'mixin' => [],
             'param-immediately-invoked-callable' => [],
             'param-later-invoked-callable' => [],
         ];
@@ -204,6 +205,16 @@ final class DocblockManipulator
                         'name' => $matches[3],
                         'parameters' => $matches[4],
                         'description' => $matches[5] ?? null,
+                    ];
+                }
+                break;
+
+            case 'mixin':
+                // @mixin ClassName
+                if (preg_match('/^([\\\\\w]+)(?:\s+(.+))?$/', $value, $matches)) {
+                    return [
+                        'className' => $matches[1],
+                        'description' => $matches[2] ?? null,
                     ];
                 }
                 break;
