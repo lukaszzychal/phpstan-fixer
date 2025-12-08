@@ -7,3 +7,4 @@ parameters:
         - tests/Fixtures
     ignoreErrors:
         - '#Call to method.*assertIsArray\(\) with array.*will always evaluate to true#'
+    reportUnmatchedIgnoredErrors: false
