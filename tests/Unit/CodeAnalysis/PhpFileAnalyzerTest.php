@@ -38,7 +38,6 @@ final class PhpFileAnalyzerTest extends TestCase
         $ast = $this->analyzer->parse($code);
 
         $this->assertNotNull($ast);
-        /** @phpstan-ignore-next-line */
         $this->assertIsArray($ast);
     }
 
