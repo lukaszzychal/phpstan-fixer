@@ -7,14 +7,14 @@
  * file that was distributed with this source code.
  *
  * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
- *
+ */
+
 declare(strict_types=1);
 
 namespace PhpstanFixer\Tests\Unit\Strategy;
 
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
-use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\CollectionGenericDocblockFixer;
 use PHPUnit\Framework\TestCase;
 
@@ -25,22 +25,56 @@ final class CollectionGenericDocblockFixerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->fixer = new CollectionGenericDocblockFixer(
-            new PhpFileAnalyzer(),
-            new DocblockManipulator()
-        );
+        $analyzer = new PhpFileAnalyzer();
+        $docblockManipulator = new DocblockManipulator();
+        $this->fixer = new CollectionGenericDocblockFixer($analyzer, $docblockManipulator);
     }
 
-    public function testCanFixCollectionGeneric(): void
+    public function testCanFixCollectionWithoutGenerics(): void
     {
-        $issue = new Issue('/path/to/file.php', 10, 'Generic type Collection needs parameters');
-        
+        $issue = new \PhpstanFixer\Issue(
+            filePath: '/path/to/file.php',
+            line: 10,
+            message: 'Access to an undefined property Collection::$items'
+        );
+
         $this->assertTrue($this->fixer->canFix($issue));
     }
 
-    public function testGetName(): void
+    public function testCannotFixNonCollectionIssues(): void
     {
-        $this->assertSame('CollectionGenericDocblockFixer', $this->fixer->getName());
+        $issue = new \PhpstanFixer\Issue(
+            filePath: '/path/to/file.php',
+            line: 10,
+            message: 'Some other error'
+        );
+
+        $this->assertFalse($this->fixer->canFix($issue));
+    }
+
+    public function testAddsGenericToCollection(): void
+    {
+        $code = <<<'PHP'
+<?php
+/**
+ * @return Collection
+ */
+function getItems() {
+    return collect([]);
+}
+PHP;
+
+        $issue = new \PhpstanFixer\Issue(
+            filePath: '/path/to/file.php',
+            line: 3,
+            message: 'Collection without generic type'
+        );
+
+        $result = $this->fixer->fixIssue($issue, $code);
+
+        $this->assertNotNull($result);
+        if ($result->isSuccessful()) {
+            $this->assertStringContainsString('Collection<int, mixed>', $result->getFixedContent());
+        }
     }
 }
-
