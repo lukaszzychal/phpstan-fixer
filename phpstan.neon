@@ -5,3 +5,5 @@ parameters:
         - tests
     excludePaths:
         - tests/Fixtures
+    ignoreErrors:
+        - '#Call to method PHPUnit\\Framework\\Assert::assertIsArray\(\) with array<PhpParser\\Node\\Stmt> will always evaluate to true#'
