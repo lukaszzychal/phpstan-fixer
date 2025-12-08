@@ -206,6 +206,20 @@ The project uses GitHub Actions for continuous integration:
 
 See [`.github/workflows/`](.github/workflows/) for details.
 
+### Compatibility Testing
+
+This package uses [PHP Compatibility Tester](https://github.com/lukaszzychal/php-compatibility-tester) to ensure compatibility across different frameworks and PHP versions:
+
+- **Packagist**: [lukaszzychal/php-compatibility-tester](https://packagist.org/packages/lukaszzychal/php-compatibility-tester)
+- **GitHub**: [lukaszzychal/php-compatibility-tester](https://github.com/lukaszzychal/php-compatibility-tester)
+
+Compatibility tests run automatically:
+- **Monthly**: On the 1st day of each month via GitHub Actions
+- **Manually**: Trigger via GitHub Actions UI (workflow_dispatch)
+- **Locally**: Run `vendor/bin/compatibility-tester test` to test locally
+
+This automatically tests `phpstan-fixer` against various frameworks (Laravel 11/12, Symfony 7/8, CodeIgniter 4/5) and PHP versions (8.1-8.4) to ensure it works correctly in different environments. Test reports are available as GitHub Actions artifacts.
+
 ### Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
