@@ -26,7 +26,7 @@ use PhpParser\ParserFactory;
 /**
  * Analyzes PHP files using AST parsing.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class PhpFileAnalyzer
 {

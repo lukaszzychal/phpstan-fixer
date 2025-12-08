@@ -15,7 +15,7 @@ declare(strict_types=1);
  *
  * Framework-agnostic tool for automatically fixing PHPStan errors.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 
 // Find the autoloader by traversing up the directory tree

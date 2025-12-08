@@ -14,7 +14,7 @@ namespace PhpstanFixer\CodeAnalysis;
 /**
  * Utility for manipulating PHPDoc blocks in PHP code.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class DocblockManipulator
 {

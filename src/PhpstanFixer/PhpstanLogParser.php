@@ -16,7 +16,7 @@ use JsonException;
 /**
  * Parses PHPStan JSON output into Issue objects.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class PhpstanLogParser
 {

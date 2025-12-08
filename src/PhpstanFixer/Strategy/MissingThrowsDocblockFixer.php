@@ -19,7 +19,7 @@ use PhpstanFixer\Issue;
 /**
  * Fixes missing @throws annotations.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class MissingThrowsDocblockFixer implements FixStrategyInterface
 {

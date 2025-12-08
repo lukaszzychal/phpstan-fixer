@@ -19,7 +19,7 @@ use PhpstanFixer\Issue;
 /**
  * Fixes undefined property errors by adding @property or @var annotations.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class MissingPropertyDocblockFixer implements FixStrategyInterface
 {

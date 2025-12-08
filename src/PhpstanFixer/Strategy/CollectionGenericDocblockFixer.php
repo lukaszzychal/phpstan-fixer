@@ -19,7 +19,7 @@ use PhpstanFixer\Issue;
 /**
  * Fixes missing generic type parameters in Collection types.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class CollectionGenericDocblockFixer implements FixStrategyInterface
 {

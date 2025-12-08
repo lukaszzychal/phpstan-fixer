@@ -14,7 +14,7 @@ namespace PhpstanFixer;
 /**
  * Value object representing the result of a fix operation.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class FixResult
 {
