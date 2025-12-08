@@ -19,7 +19,7 @@ use PhpstanFixer\Issue;
 /**
  * Fixes missing return type annotations by adding @return mixed.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class MissingReturnDocblockFixer implements FixStrategyInterface
 {

@@ -20,7 +20,7 @@ use PhpstanFixer\Issue;
  * Fixes undefined pivot property errors by adding @property-read annotation.
  * This is specifically for Laravel Eloquent models.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class UndefinedPivotPropertyFixer implements FixStrategyInterface
 {

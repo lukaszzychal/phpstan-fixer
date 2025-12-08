@@ -16,7 +16,7 @@ use PhpstanFixer\Strategy\FixStrategyInterface;
 /**
  * Service that orchestrates fix strategies to resolve PHPStan issues.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class AutoFixService
 {

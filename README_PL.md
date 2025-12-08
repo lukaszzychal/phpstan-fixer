@@ -247,7 +247,7 @@ MIT License - zobacz plik LICENSE po szczegóły.
 
 **Łukasz Zychal**
 
-- Email: [lukasz@zychal.pl](mailto:lukasz@zychal.pl)
+- Email: [lukasz.zychal.dev@gmail.com](mailto:lukasz.zychal.dev@gmail.com)
 - GitHub Issues: [Zgłoś błędy i problemy](https://github.com/lukaszzychal/phpstan-fixer/issues)
 - Dyskusje: [Dołącz do dyskusji](https://github.com/lukaszzychal/phpstan-fixer/discussions)
 

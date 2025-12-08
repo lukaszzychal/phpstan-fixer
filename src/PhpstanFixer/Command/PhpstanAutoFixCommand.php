@@ -34,7 +34,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * CLI command for automatically fixing PHPStan errors.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class PhpstanAutoFixCommand extends Command
 {

@@ -18,7 +18,7 @@ use PhpstanFixer\Issue;
 /**
  * Fixes missing use statements by adding them after namespace declaration.
  *
- * @author Łukasz Zychal <lukasz@zychal.pl>
+ * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
 final class MissingUseStatementFixer implements FixStrategyInterface
 {
