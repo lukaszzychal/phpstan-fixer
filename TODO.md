@@ -2,6 +2,16 @@
 
 This document lists fixers that could be implemented based on PHPStan documentation but are not yet available.
 
+## Organization
+
+All tasks from this TODO are organized into GitHub milestones:
+- **v1.0.1**: Bug fixes (Issue #16)
+- **v1.1.0**: Configuration system (Issue #17)
+- **v1.1.1**: High priority fixers (Issue #18)
+- **v1.2.0**: Enhancements (Issues #14, #15)
+
+See [ROADMAP.md](ROADMAP.md) for detailed planning.
+
 ## High Priority
 
 ### 1. MixinFixer

@@ -220,6 +220,29 @@ Compatibility tests run automatically:
 
 This automatically tests `phpstan-fixer` against various frameworks (Laravel 11/12, Symfony 7/8, CodeIgniter 4/5) and PHP versions (8.1-8.4) to ensure it works correctly in different environments. Test reports are available as GitHub Actions artifacts.
 
+#### Initializing Compatibility Testing
+
+To set up compatibility testing in your project:
+
+1. **Run the init command**:
+   ```bash
+   vendor/bin/compatibility-tester init
+   ```
+
+2. **The command will**:
+   - Create `.compatibility.yml` configuration file
+   - Copy PHPUnit test templates to `tests/compatibility/`
+   - Copy GitHub Actions workflow to `.github/workflows/compatibility-tests.yml`
+   - Copy test scripts to `scripts/`
+
+3. **Edit `.compatibility.yml`** to configure:
+   - Your package name
+   - PHP versions to test
+   - Frameworks and versions
+   - Test scripts to run
+
+**Note**: If the example configuration file is not found in the package, you can use the example from `vendor/lukaszzychal/php-compatibility-tester/tests/fixtures/test-package/.compatibility.yml` as a reference.
+
 ### Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
