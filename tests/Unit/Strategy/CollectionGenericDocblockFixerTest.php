@@ -83,7 +83,10 @@ PHP;
 
         $result = $this->fixer->fix($issue, $code);
 
-        $this->assertNotNull($result);
+        // fix() always returns FixResult (never null), so we check isSuccessful() instead
+        // @phpstan-ignore-next-line - FixResult is always returned, but we verify it's a valid object
+        $this->assertInstanceOf(\PhpstanFixer\FixResult::class, $result);
+        
         if ($result->isSuccessful()) {
             $this->assertStringContainsString('Collection<int, mixed>', $result->getFixedContent());
         }
