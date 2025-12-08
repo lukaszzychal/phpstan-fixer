@@ -22,10 +22,38 @@ The pre-commit hook runs three checks in sequence:
 
 ## Installation
 
-The hook is automatically installed when you clone the repository. If you need to install it manually:
+### First Time Setup
+
+1. Copy the hook to your `.git/hooks/` directory:
 
 ```bash
+cp .githooks/pre-commit .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
+```
+
+2. The hook is now active and will run on every `git commit`.
+
+### Automatic Installation (Optional)
+
+You can configure Git to automatically use hooks from `.githooks/`:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+This makes Git look for hooks in `.githooks/` instead of `.git/hooks/`.
+
+### Verification
+
+Test the hook works:
+
+```bash
+.git/hooks/pre-commit
+```
+
+You should see:
+```
+✅ All pre-commit checks passed!
 ```
 
 ## Usage
@@ -100,4 +128,3 @@ To modify the hook, edit `.git/hooks/pre-commit`. Changes will only affect your 
 - [PHPStan Configuration](../phpstan.neon)
 - [PHPUnit Configuration](../phpunit.xml)
 - [README](../README.md)
-
