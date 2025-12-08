@@ -6,4 +6,4 @@ parameters:
     excludePaths:
         - tests/Fixtures
     ignoreErrors:
-        - '#Call to method PHPUnit\\\\Framework\\\\Assert::assertIsArray\(\) with array<.*> will always evaluate to true#'
+        - '#assertIsArray\(\) with array.*will always evaluate to true#'
