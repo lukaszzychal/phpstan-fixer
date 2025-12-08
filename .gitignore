@@ -8,3 +8,8 @@ coverage.xml
 phpstan-output.json
 .phpstan/
 
+# PHPStan error logs (ignore log files, but keep documentation)
+log-errors-phpstan/*.txt
+log-errors-phpstan/*.json
+!log-errors-phpstan/README.md
+!log-errors-phpstan/*analysis*.md

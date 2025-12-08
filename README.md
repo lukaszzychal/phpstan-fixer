@@ -12,6 +12,7 @@ Framework-agnostic PHP library for automatically fixing PHPStan errors using sta
 - Offline-friendly (no AI or network access required)
 - Suggest mode (preview changes) and Apply mode (write changes)
 - Supports multiple fix strategies for different error types
+- **Configuration system** - Control how each error type is handled (fix, ignore, or report)
 
 ## Installation
 
@@ -69,6 +70,90 @@ Specify a custom PHPStan command:
 ```bash
 vendor/bin/phpstan-fixer --phpstan-command="vendor/bin/phpstan analyse src tests --level=5 --error-format=json" --mode=apply
 ```
+
+### Configuration File
+
+You can configure how different error types are handled using a configuration file. Create `phpstan-fixer.yaml` or `phpstan-fixer.json` in your project root:
+
+**YAML Format** (`phpstan-fixer.yaml`):
+
+```yaml
+rules:
+  "Access to an undefined property":
+    action: "fix"  # fix, ignore, or report
+  
+  "Method has no return type":
+    action: "fix"
+  
+  "Unknown class":
+    action: "ignore"  # Don't fix and don't show
+  
+  "Extra arguments":
+    action: "report"  # Don't fix, but show in output
+  
+  # Wildcard patterns
+  "Call to an undefined method *":
+    action: "fix"
+  
+  # Regex patterns
+  "/.*magic.*/":
+    action: "report"
+
+default:
+  action: "fix"  # Default action for unmatched errors
+```
+
+**JSON Format** (`phpstan-fixer.json`):
+
+```json
+{
+  "rules": {
+    "Access to an undefined property": {
+      "action": "fix"
+    },
+    "Method has no return type": {
+      "action": "fix"
+    },
+    "Unknown class": {
+      "action": "ignore"
+    },
+    "Extra arguments": {
+      "action": "report"
+    }
+  },
+  "default": {
+    "action": "fix"
+  }
+}
+```
+
+**Configuration Actions:**
+
+- **`fix`** (default) - Attempt to automatically fix the error
+- **`ignore`** - Don't fix and don't display the error (silent ignore)
+- **`report`** - Don't fix, but display in original PHPStan format
+
+**Using Configuration:**
+
+```bash
+# Auto-discover configuration file
+vendor/bin/phpstan-fixer
+
+# Specify configuration file explicitly
+vendor/bin/phpstan-fixer --config=phpstan-fixer.yaml
+```
+
+**Pattern Matching:**
+
+- **Exact match**: `"Access to an undefined property"` - matches exactly
+- **Wildcard**: `"Access to an undefined *"` - matches with `*` as wildcard
+- **Regex**: `"/Access to an undefined \\w+/"` - full PCRE regex pattern
+
+**YAML Support:**
+
+For YAML configuration files, you need either:
+- `ext-yaml` PHP extension (install via `pecl install yaml`), or
+- `symfony/yaml` package (add to `composer.json`)
 
 ## Supported Fix Strategies
 

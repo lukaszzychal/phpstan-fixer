@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace PhpstanFixer;
 
+use PhpstanFixer\Configuration\Configuration;
 use PhpstanFixer\Strategy\FixStrategyInterface;
 
 /**
@@ -22,9 +23,11 @@ final class AutoFixService
 {
     /**
      * @param FixStrategyInterface[] $strategies Array of fix strategies to use
+     * @param Configuration|null $configuration Optional configuration for error handling
      */
     public function __construct(
-        private array $strategies = []
+        private array $strategies = [],
+        private readonly ?Configuration $configuration = null
     ) {
     }
 
@@ -41,10 +44,27 @@ final class AutoFixService
      *
      * @param Issue $issue The issue to fix
      * @param string $fileContent Current file content
-     * @return FixResult|null Returns null if no strategy can handle the issue
+     * @return FixResult|null Returns null if no strategy can handle the issue, or ActionResult for ignore/report
      */
     public function fixIssue(Issue $issue, string $fileContent): ?FixResult
     {
+        // Check configuration first
+        if ($this->configuration !== null) {
+            $rule = $this->configuration->getRuleForError($issue->getMessage());
+
+            if ($rule->isIgnore()) {
+                // Return a special result indicating the issue was ignored
+                return FixResult::ignored($issue, $fileContent);
+            }
+
+            if ($rule->isReport()) {
+                // Return a special result indicating the issue should be reported
+                return FixResult::reported($issue, $fileContent);
+            }
+
+            // If action is 'fix', continue with normal fix logic
+        }
+
         foreach ($this->strategies as $strategy) {
             if ($strategy->canFix($issue)) {
                 return $strategy->fix($issue, $fileContent);
@@ -71,16 +91,25 @@ final class AutoFixService
 
         foreach ($issues as $issue) {
             $result = $this->fixIssue($issue, $currentContent);
-            if ($result !== null && $result->isSuccessful()) {
-                $currentContent = $result->getFixedContent();
-                $results[] = $result;
-            } else {
-                // Create a failure result
+            
+            if ($result === null) {
+                // No strategy could handle it
                 $results[] = FixResult::failure(
                     $issue,
                     $currentContent,
                     'No strategy could fix this issue'
                 );
+            } elseif ($result->isIgnored()) {
+                // Issue was ignored by configuration - add to results for tracking
+                // but don't update content (ignored issues don't modify the file)
+                $results[] = $result;
+            } elseif ($result->isSuccessful()) {
+                // Fix was successful - update content
+                $currentContent = $result->getFixedContent();
+                $results[] = $result;
+            } else {
+                // Failed fix or reported - keep original content
+                $results[] = $result;
             }
         }
 
@@ -142,13 +171,22 @@ final class AutoFixService
                 }
             }
 
-            // Get unfixed issues
+            // Get unfixed, reported, and ignored issues
             // Note: Use $result->getIssue() instead of $fileIssues[$index] because
             // fixIssues() sorts issues by line number (descending), which reorders them.
             // Using array indices would map to wrong issues.
             $unfixedIssues = [];
+            $reportedIssues = [];
+            $ignoredIssues = [];
             foreach ($fixResults as $result) {
-                if (!$result->isSuccessful()) {
+                if ($result->isIgnored()) {
+                    // Ignored issues (tracked but not displayed)
+                    $ignoredIssues[] = $result->getIssue();
+                } elseif ($result->isReported()) {
+                    // Reported issues should be shown in output
+                    $reportedIssues[] = $result->getIssue();
+                } elseif (!$result->isSuccessful()) {
+                    // Unfixed issues (not ignored, not reported)
                     $unfixedIssues[] = $result->getIssue();
                 }
             }
@@ -161,6 +199,8 @@ final class AutoFixService
                 'hasChanges' => $hasChanges,
                 'fixCount' => count(array_filter($fixResults, fn($r) => $r->isSuccessful())),
                 'unfixedIssues' => $unfixedIssues,
+                'reportedIssues' => $reportedIssues,
+                'ignoredIssues' => $ignoredIssues,
             ];
         }
 
@@ -187,6 +227,44 @@ final class AutoFixService
     }
 
     /**
+     * Get all ignored issues from results.
+     *
+     * @param array<string, array<string, mixed>> $results Results from fixAllIssues
+     * @return Issue[] Array of ignored issues
+     */
+    public function getIgnoredIssues(array $results): array
+    {
+        $ignoredIssues = [];
+
+        foreach ($results as $fileResults) {
+            foreach ($fileResults['ignoredIssues'] ?? [] as $issue) {
+                $ignoredIssues[] = $issue;
+            }
+        }
+
+        return $ignoredIssues;
+    }
+
+    /**
+     * Get all reported issues from results.
+     *
+     * @param array<string, array<string, mixed>> $results Results from fixAllIssues
+     * @return Issue[] Array of reported issues
+     */
+    public function getReportedIssues(array $results): array
+    {
+        $reportedIssues = [];
+
+        foreach ($results as $fileResults) {
+            foreach ($fileResults['reportedIssues'] ?? [] as $issue) {
+                $reportedIssues[] = $issue;
+            }
+        }
+
+        return $reportedIssues;
+    }
+
+    /**
      * Get statistics about fix attempts.
      *
      * @param array<string, array<string, mixed>> $results Results from fixAllIssues
@@ -200,6 +278,8 @@ final class AutoFixService
             'total_issues' => 0,
             'issues_fixed' => 0,
             'issues_failed' => 0,
+            'issues_ignored' => 0,
+            'issues_reported' => 0,
         ];
 
         foreach ($results as $fileResults) {
@@ -209,7 +289,14 @@ final class AutoFixService
 
             $stats['total_issues'] += count($fileResults['issues']);
             $stats['issues_fixed'] += $fileResults['fixCount'];
-            $stats['issues_failed'] += count($fileResults['issues']) - $fileResults['fixCount'];
+            $stats['issues_ignored'] += count($fileResults['ignoredIssues'] ?? []);
+            $stats['issues_reported'] += count($fileResults['reportedIssues'] ?? []);
+            
+            // Issues failed = total - fixed - ignored - reported
+            $stats['issues_failed'] += count($fileResults['issues']) 
+                - $fileResults['fixCount']
+                - count($fileResults['ignoredIssues'] ?? [])
+                - count($fileResults['reportedIssues'] ?? []);
         }
 
         return $stats;
