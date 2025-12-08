@@ -35,7 +35,18 @@ final class CollectionGenericDocblockFixerTest extends TestCase
         $issue = new \PhpstanFixer\Issue(
             filePath: '/path/to/file.php',
             line: 10,
-            message: 'Access to an undefined property Collection::$items'
+            message: 'Generic type Collection needs parameters'
+        );
+
+        $this->assertTrue($this->fixer->canFix($issue));
+    }
+
+    public function testCanFixCollectionWithGenericTypeMessage(): void
+    {
+        $issue = new \PhpstanFixer\Issue(
+            filePath: '/path/to/file.php',
+            line: 10,
+            message: 'Generic type Illuminate\Support\Collection needs parameters'
         );
 
         $this->assertTrue($this->fixer->canFix($issue));
@@ -67,10 +78,10 @@ PHP;
         $issue = new \PhpstanFixer\Issue(
             filePath: '/path/to/file.php',
             line: 3,
-            message: 'Collection without generic type'
+            message: 'Generic type Collection needs parameters'
         );
 
-        $result = $this->fixer->fixIssue($issue, $code);
+        $result = $this->fixer->fix($issue, $code);
 
         $this->assertNotNull($result);
         if ($result->isSuccessful()) {
