@@ -1,0 +1,78 @@
+#!/bin/bash
+
+# Pre-commit hook for phpstan-fixer
+# This hook runs code quality checks before allowing a commit
+
+set -e
+
+echo "🔍 Running pre-commit checks..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Check if vendor/bin exists
+if [ ! -d "vendor/bin" ]; then
+    echo -e "${YELLOW}⚠️  vendor/bin not found. Running composer install...${NC}"
+    composer install --no-interaction --quiet
+fi
+
+# 1. Run phpstan-fixer in suggest mode
+echo -e "${YELLOW}📋 Step 1/3: Running phpstan-fixer (suggest mode)...${NC}"
+PHPSTAN_FIXER_BIN=""
+if [ -f "vendor/bin/phpstan-fixer" ]; then
+    PHPSTAN_FIXER_BIN="vendor/bin/phpstan-fixer"
+elif [ -f "bin/phpstan-fixer" ]; then
+    PHPSTAN_FIXER_BIN="bin/phpstan-fixer"
+fi
+
+if [ -n "$PHPSTAN_FIXER_BIN" ]; then
+    if php "$PHPSTAN_FIXER_BIN" --mode=suggest 2>&1 | grep -q "Would fix\|Would add\|Would update"; then
+        echo -e "${RED}❌ phpstan-fixer found issues that could be fixed!${NC}"
+        echo -e "${YELLOW}Run '$PHPSTAN_FIXER_BIN --mode=apply' to apply fixes, or review the suggestions above.${NC}"
+        php "$PHPSTAN_FIXER_BIN" --mode=suggest
+        exit 1
+    fi
+    echo -e "${GREEN}✅ phpstan-fixer: No issues found${NC}"
+else
+    echo -e "${YELLOW}⚠️  phpstan-fixer not found, skipping...${NC}"
+fi
+
+# 2. Run PHPStan
+echo -e "${YELLOW}📋 Step 2/3: Running PHPStan static analysis...${NC}"
+if [ -f "vendor/bin/phpstan" ]; then
+    if ! vendor/bin/phpstan analyse src tests --level=5 --error-format=github > /tmp/phpstan-output.txt 2>&1; then
+        echo -e "${RED}❌ PHPStan found errors!${NC}"
+        cat /tmp/phpstan-output.txt
+        rm -f /tmp/phpstan-output.txt
+        exit 1
+    fi
+    echo -e "${GREEN}✅ PHPStan: No errors found${NC}"
+    rm -f /tmp/phpstan-output.txt
+else
+    echo -e "${YELLOW}⚠️  PHPStan not found, skipping...${NC}"
+fi
+
+# 3. Run PHPUnit tests
+echo -e "${YELLOW}📋 Step 3/3: Running PHPUnit tests...${NC}"
+if [ -f "vendor/bin/phpunit" ]; then
+    PHPUNIT_OUTPUT=$(vendor/bin/phpunit 2>&1)
+    PHPUNIT_EXIT_CODE=$?
+    
+    # Check if tests passed (exit code 0) or if there were only warnings (exit code 2 but output contains "OK")
+    if [ $PHPUNIT_EXIT_CODE -eq 0 ] || (echo "$PHPUNIT_OUTPUT" | grep -q "OK (" && echo "$PHPUNIT_OUTPUT" | grep -vq "FAILURES\|ERRORS"); then
+        echo -e "${GREEN}✅ PHPUnit: All tests passed${NC}"
+    else
+        echo -e "${RED}❌ PHPUnit tests failed!${NC}"
+        echo "$PHPUNIT_OUTPUT"
+        exit 1
+    fi
+else
+    echo -e "${YELLOW}⚠️  PHPUnit not found, skipping...${NC}"
+fi
+
+echo -e "${GREEN}✅ All pre-commit checks passed!${NC}"
+exit 0
+
