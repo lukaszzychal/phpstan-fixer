@@ -6,4 +6,4 @@ parameters:
     excludePaths:
         - tests/Fixtures
     ignoreErrors:
-        - '#assertIsArray\(\) with array.*will always evaluate to true#'
+        - '#Call to method.*assertIsArray\(\) with array.*will always evaluate to true#'
