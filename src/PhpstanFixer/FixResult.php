@@ -56,13 +56,15 @@ final class FixResult
             return $this->description;
         }
 
-        if (!empty($this->changes)) {
-            return implode(', ', $this->changes);
-        }
-
-        return $this->successful
+        $baseMessage = $this->successful
             ? sprintf('Fixed issue at line %d', $this->issue->getLine())
             : sprintf('Could not fix issue at line %d', $this->issue->getLine());
+
+        if (!empty($this->changes)) {
+            return $baseMessage . ' (' . implode(', ', $this->changes) . ')';
+        }
+
+        return $baseMessage;
     }
 
     /**
