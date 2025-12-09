@@ -29,7 +29,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ### 3. PrefixedTagsFixer
 - **Error Pattern:** Advanced types not understood by IDEs
 - **Fix:** Add `@phpstan-param`, `@phpstan-return` alongside standard tags
-- **Status:** Not implemented
+- **Status:** Implemented (see PrefixedTagsFixer)
 - **Reference:** PHPStan docs - Prefixed tags section
 
 ## Medium Priority

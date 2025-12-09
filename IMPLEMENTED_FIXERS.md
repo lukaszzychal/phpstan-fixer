@@ -98,10 +98,10 @@
 - **Naprawa:** Dodaje `@phpstan-sealed Class1|Class2`
 - **Status:** NIE zaimplementowane
 
-#### 9. ❌ PrefixedTagsFixer
+#### 9. ✅ PrefixedTagsFixer
 - **Błąd:** Advanced types not understood by IDEs
 - **Naprawa:** Dodaje `@phpstan-param`, `@phpstan-return` obok standardowych tagów
-- **Status:** NIE zaimplementowane
+- **Status:** Zaimplementowane
 
 #### 10. ❌ ClassesNamedAfterInternalTypesFixer
 - **Błąd:** Konflikt nazw klas z wewnętrznymi typami PHP (Resource, Double, Number)

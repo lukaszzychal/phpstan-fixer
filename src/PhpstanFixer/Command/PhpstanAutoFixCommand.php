@@ -25,6 +25,7 @@ use PhpstanFixer\Strategy\MissingReturnDocblockFixer;
 use PhpstanFixer\Strategy\MissingThrowsDocblockFixer;
 use PhpstanFixer\Strategy\MissingUseStatementFixer;
 use PhpstanFixer\Strategy\MixinFixer;
+use PhpstanFixer\Strategy\PrefixedTagsFixer;
 use PhpstanFixer\Strategy\ReadonlyPropertyFixer;
 use PhpstanFixer\Strategy\UndefinedMethodFixer;
 use PhpstanFixer\Strategy\UndefinedPivotPropertyFixer;
@@ -352,6 +353,7 @@ final class PhpstanAutoFixCommand extends Command
             new MissingThrowsDocblockFixer($analyzer, $docblockManipulator),
             new CallableTypeFixer($analyzer, $docblockManipulator),
             new MixinFixer($analyzer, $docblockManipulator),
+            new PrefixedTagsFixer($analyzer, $docblockManipulator),
         ];
 
         return new AutoFixService($strategies, $configuration);
