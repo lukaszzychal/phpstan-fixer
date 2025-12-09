@@ -119,5 +119,12 @@ PHP;
             }
         }
     }
+
+    public function testCanFixPureMessage(): void
+    {
+        $issue = new Issue('/tmp/file.php', 6, 'Function identity seems pure');
+
+        $this->assertTrue($this->fixer->canFix($issue));
+    }
 }
 

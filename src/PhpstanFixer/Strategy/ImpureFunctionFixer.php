@@ -34,10 +34,10 @@ final class ImpureFunctionFixer implements FixStrategyInterface
         $message = $issue->getMessage();
 
         return $issue->matchesPattern('/impure/i')
-            || $issue->matchesPattern('/pure function/i')
             || $issue->matchesPattern('/side effect/i')
             || $issue->matchesPattern('/different values/i')
-            || str_contains(strtolower($message), 'non-deterministic');
+            || str_contains(strtolower($message), 'non-deterministic')
+            || (bool) preg_match('/\bpure\b/i', $message);
     }
 
     public function fix(Issue $issue, string $fileContent): FixResult
