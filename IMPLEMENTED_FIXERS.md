@@ -68,10 +68,10 @@
 - **Naprawa:** Dodaje `@internal` tag
 - **Status:** NIE zaimplementowane (rzadko potrzebne automatycznie)
 
-#### 3. ❌ ImpureFunctionFixer
+#### 3. ✅ ImpureFunctionFixer
 - **Błąd:** Functions that may return different values
 - **Naprawa:** Dodaje `@phpstan-impure` lub `@phpstan-pure`
-- **Status:** NIE zaimplementowane
+- **Status:** Zaimplementowane
 
 #### 4. ❌ RequireExtendsFixer
 - **Błąd:** Interface/trait wymaga konkretnej klasy bazowej

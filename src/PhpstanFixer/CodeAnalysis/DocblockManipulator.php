@@ -105,6 +105,8 @@ final class DocblockManipulator
             'param-later-invoked-callable' => [],
             'phpstan-param' => [],
             'phpstan-return' => [],
+            'phpstan-impure' => [],
+            'phpstan-pure' => [],
         ];
 
         // Remove /** and */ markers
@@ -118,10 +120,10 @@ final class DocblockManipulator
             $line = preg_replace('/^\s*\*\s*/', '', $line);
 
             if ($line === '' || str_starts_with($line, '@')) {
-                // Parse annotation
-                if (preg_match('/^@(\w+(?:-\w+)*)\s+(.+)$/', $line, $matches)) {
+                // Parse annotation (value is optional)
+                if (preg_match('/^@(\w+(?:-\w+)*)(?:\s+(.+))?$/', $line, $matches)) {
                     $tag = $matches[1];
-                    $value = $matches[2];
+                    $value = $matches[2] ?? '';
 
                     if (isset($annotations[$tag])) {
                         $annotations[$tag][] = $this->parseAnnotationValue($tag, $value);
@@ -222,6 +224,10 @@ final class DocblockManipulator
                     ];
                 }
                 break;
+
+            case 'phpstan-impure':
+            case 'phpstan-pure':
+                return ['flag' => true];
         }
 
         return ['raw' => $value];
@@ -266,15 +272,20 @@ final class DocblockManipulator
      */
     public function addAnnotation(string $docblockContent, string $annotationType, string $annotationValue): string
     {
+        $annotationValue = trim($annotationValue);
+        $annotationLine = $annotationValue === ''
+            ? "@{$annotationType}"
+            : "@{$annotationType} {$annotationValue}";
+
         // If no docblock exists, create one
         if (!str_contains($docblockContent, '/**')) {
-            $docblock = "/**\n * @{$annotationType} {$annotationValue}\n */";
+            $docblock = "/**\n * {$annotationLine}\n */";
             return $docblock;
         }
 
         // Parse existing docblock
         $lines = explode("\n", $docblockContent);
-        $newAnnotation = " * @{$annotationType} {$annotationValue}";
+        $newAnnotation = " * {$annotationLine}";
 
         // Find insertion point (before closing */)
         $insertIndex = count($lines) - 1;
@@ -314,6 +325,8 @@ final class DocblockManipulator
             'param-later-invoked-callable',
             'return',
             'phpstan-return',
+            'phpstan-impure',
+            'phpstan-pure',
             'throws',
             'var',
             'property',
@@ -325,7 +338,11 @@ final class DocblockManipulator
         foreach ($order as $type) {
             if (isset($annotations[$type])) {
                 foreach ($annotations[$type] as $value) {
-                    $lines[] = ' * @' . $type . ' ' . $value;
+                    $line = ' * @' . $type;
+                    if ($value !== '') {
+                        $line .= ' ' . $value;
+                    }
+                    $lines[] = $line;
                 }
             }
         }
@@ -427,6 +444,10 @@ final class DocblockManipulator
                     $result .= ' ' . $data['description'];
                 }
                 return $result;
+
+            case 'phpstan-impure':
+            case 'phpstan-pure':
+                return '';
         }
 
         return $data['raw'] ?? '';
