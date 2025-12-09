@@ -37,7 +37,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ### 4. ImpureFunctionFixer
 - **Error Pattern:** Functions that may return different values on successive calls
 - **Fix:** Add `@phpstan-impure` or `@phpstan-pure` tag
-- **Status:** Not implemented
+- **Status:** Implemented (see ImpureFunctionFixer)
 - **Reference:** PHPStan docs - Impure functions section
 
 ### 5. RequireExtendsFixer

@@ -19,6 +19,7 @@ use PhpstanFixer\Configuration\ConfigurationLoader;
 use PhpstanFixer\PhpstanLogParser;
 use PhpstanFixer\Strategy\CallableTypeFixer;
 use PhpstanFixer\Strategy\CollectionGenericDocblockFixer;
+use PhpstanFixer\Strategy\ImpureFunctionFixer;
 use PhpstanFixer\Strategy\MissingParamDocblockFixer;
 use PhpstanFixer\Strategy\MissingPropertyDocblockFixer;
 use PhpstanFixer\Strategy\MissingReturnDocblockFixer;
@@ -354,6 +355,7 @@ final class PhpstanAutoFixCommand extends Command
             new CallableTypeFixer($analyzer, $docblockManipulator),
             new MixinFixer($analyzer, $docblockManipulator),
             new PrefixedTagsFixer($analyzer, $docblockManipulator),
+            new ImpureFunctionFixer($analyzer, $docblockManipulator),
         ];
 
         return new AutoFixService($strategies, $configuration);

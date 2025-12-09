@@ -5,6 +5,8 @@ alwaysApply: true
 ---
 
 ## Testing
+- Practice TDD: write or adjust failing tests before implementing changes
+- Prefer classical/Detroit style testing (state verification, limited mocking); avoid London/mockist approach by default
 - Add/adjust tests when behavior changes or bugs are fixed
 - Run relevant suites (PHPUnit/PHPStan) when feasible; state when not run
 - Follow test structure: Arrange-Act-Assert pattern
