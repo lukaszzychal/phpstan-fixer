@@ -103,6 +103,8 @@ final class DocblockManipulator
             'mixin' => [],
             'param-immediately-invoked-callable' => [],
             'param-later-invoked-callable' => [],
+            'phpstan-param' => [],
+            'phpstan-return' => [],
         ];
 
         // Remove /** and */ markers
@@ -142,6 +144,7 @@ final class DocblockManipulator
     {
         switch ($tag) {
             case 'param':
+            case 'phpstan-param':
                 // @param Type $name Description
                 if (preg_match('/^([^\s$]+)\s+(\$\w+)(?:\s+(.+))?$/', $value, $matches)) {
                     return [
@@ -164,6 +167,7 @@ final class DocblockManipulator
                 break;
 
             case 'return':
+            case 'phpstan-return':
                 // @return Type Description
                 if (preg_match('/^([^\s]+)(?:\s+(.+))?$/', $value, $matches)) {
                     return [
@@ -303,7 +307,20 @@ final class DocblockManipulator
         }
 
         // Add annotations in a consistent order
-        $order = ['param', 'param-immediately-invoked-callable', 'param-later-invoked-callable', 'return', 'throws', 'var', 'property', 'property-read', 'property-write', 'method'];
+        $order = [
+            'param',
+            'phpstan-param',
+            'param-immediately-invoked-callable',
+            'param-later-invoked-callable',
+            'return',
+            'phpstan-return',
+            'throws',
+            'var',
+            'property',
+            'property-read',
+            'property-write',
+            'method'
+        ];
 
         foreach ($order as $type) {
             if (isset($annotations[$type])) {
@@ -377,6 +394,7 @@ final class DocblockManipulator
     {
         switch ($type) {
             case 'param':
+            case 'phpstan-param':
                 $result = ($data['type'] ?? 'mixed') . ' ' . ($data['name'] ?? '');
                 if (isset($data['description'])) {
                     $result .= ' ' . $data['description'];
@@ -384,6 +402,7 @@ final class DocblockManipulator
                 return $result;
 
             case 'return':
+            case 'phpstan-return':
                 $result = $data['type'] ?? 'mixed';
                 if (isset($data['description'])) {
                     $result .= ' ' . $data['description'];
