@@ -136,10 +136,6 @@ final class RequireExtendsFixer implements FixStrategyInterface
 
         foreach ($classLikes as $classLike) {
             $line = $this->analyzer->getNodeLine($classLike);
-            if ($line === null) {
-                continue;
-            }
-
             if ($targetLine >= $line - 1 && $targetLine <= $line + 2) {
                 return [$classLike, $line];
             }
