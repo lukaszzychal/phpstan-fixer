@@ -58,10 +58,10 @@
 
 ### Z dokumentacji PHPDocs Basics:
 
-#### 1. ❌ MixinFixer
+#### 1. ✅ MixinFixer
 - **Błąd:** Delegacja metod przez `__call` / `__get` / `__set`
 - **Naprawa:** Dodaje `@mixin ClassName` na klasie
-- **Status:** NIE zaimplementowane
+- **Status:** Zaimplementowane
 
 #### 2. ✅ InternalAnnotationFixer
 - **Błąd:** "Access to internal element"
@@ -83,10 +83,10 @@
 - **Naprawa:** Dodaje `@phpstan-require-implements InterfaceName` na trait
 - **Status:** Zaimplementowane
 
-#### 6. ❌ ReadonlyPropertyFixer
+#### 6. ✅ ReadonlyPropertyFixer
 - **Błąd:** Property assigned outside of declaring class (PHP < 8.1)
 - **Naprawa:** Dodaje `@readonly` tag na property
-- **Status:** NIE zaimplementowane
+- **Status:** Zaimplementowane
 
 #### 7. ✅ ImmutableClassFixer
 - **Błąd:** Property assigned outside of immutable class
@@ -153,8 +153,8 @@
 ## 📊 Podsumowanie
 
 ### Statystyki:
-- ✅ **Zaimplementowane:** 21 fixerów
-- ❌ **Możliwe do dodania:** ~8 dodatkowych fixerów z dokumentacji
+- ✅ **Zaimplementowane:** 23 fixery
+- ❌ **Możliwe do dodania:** ~6 dodatkowych fixerów z dokumentacji
 - 🟡 **Wymagają poprawy:** 1 fixer (MissingUseStatementFixer – rozszerzenie FQN)
 - 🔵 **Trudne/Ryzykowne:** 4+ typy błędów
 
