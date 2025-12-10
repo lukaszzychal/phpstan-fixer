@@ -63,10 +63,10 @@
 - **Naprawa:** Dodaje `@mixin ClassName` na klasie
 - **Status:** NIE zaimplementowane
 
-#### 2. ❌ InternalAnnotationFixer
+#### 2. ✅ InternalAnnotationFixer
 - **Błąd:** "Access to internal element"
 - **Naprawa:** Dodaje `@internal` tag
-- **Status:** NIE zaimplementowane (rzadko potrzebne automatycznie)
+- **Status:** Zaimplementowane (rzadko potrzebne automatycznie)
 
 #### 3. ✅ ImpureFunctionFixer
 - **Błąd:** Functions that may return different values
