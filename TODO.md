@@ -43,7 +43,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ### 5. RequireExtendsFixer
 - **Error Pattern:** Interface/trait requires specific base class
 - **Fix:** Add `@phpstan-require-extends ClassName` on interface/trait
-- **Status:** Not implemented
+- **Status:** Implemented (see RequireExtendsFixer)
 - **Reference:** PHPStan docs - Enforcing class inheritance section
 
 ### 6. RequireImplementsFixer

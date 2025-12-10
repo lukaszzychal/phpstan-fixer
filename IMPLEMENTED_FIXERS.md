@@ -73,10 +73,10 @@
 - **Naprawa:** Dodaje `@phpstan-impure` lub `@phpstan-pure`
 - **Status:** Zaimplementowane
 
-#### 4. ❌ RequireExtendsFixer
+#### 4. ✅ RequireExtendsFixer
 - **Błąd:** Interface/trait wymaga konkretnej klasy bazowej
 - **Naprawa:** Dodaje `@phpstan-require-extends ClassName` na interfejsie/trait
-- **Status:** NIE zaimplementowane
+- **Status:** Zaimplementowane
 
 #### 5. ❌ RequireImplementsFixer
 - **Błąd:** Trait wymaga implementacji interfejsu
