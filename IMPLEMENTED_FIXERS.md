@@ -113,6 +113,11 @@
 - **Naprawa:** Dodaje generyki do tablic (np. `array<int, string>`)
 - **Status:** Zaimplementowane
 
+#### 12. ✅ MagicPropertyFixer
+- **Błąd:** Unknown magic properties on classes with __get
+- **Naprawa:** Dodaje brakujące @property dla magicznych właściwości
+- **Status:** Zaimplementowane (enhancement)
+
 ---
 
 ## 🟡 Częściowo zaimplementowane / Wymagają poprawy

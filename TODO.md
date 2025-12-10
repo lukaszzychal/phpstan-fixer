@@ -110,7 +110,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 13. **MagicPropertyFixer** (enhancement)
     - **Error Pattern:** "Unknown magic properties on classes with __get"
     - **Fix:** Enhance MissingPropertyDocblockFixer to better detect magic properties
-    - **Status:** Partially implemented (needs enhancement)
+    - **Status:** Implemented (see MagicPropertyFixer)
     - **Priority:** Low
     - **Reference:** PHPStan Level 1
 
