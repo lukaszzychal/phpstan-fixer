@@ -103,7 +103,12 @@
 - **Naprawa:** Dodaje `@phpstan-param`, `@phpstan-return` obok standardowych tagów
 - **Status:** Zaimplementowane
 
-#### 11. ✅ ArrayOffsetTypeFixer
+#### 11. ✅ ClassesNamedAfterInternalTypesFixer
+- **Błąd:** Konflikt nazw klas z wewnętrznymi typami PHP (Resource, Double, Number)
+- **Naprawa:** Zmienia PHPDoc na fully-qualified name
+- **Status:** Zaimplementowane
+
+#### 12. ✅ ArrayOffsetTypeFixer
 - **Błąd:** \"Unknown array offset types\" / \"Missing iterable value type\"
 - **Naprawa:** Dodaje generyki do tablic (np. `array<int, string>`)
 - **Status:** Zaimplementowane
