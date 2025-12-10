@@ -75,7 +75,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ### 10. ClassesNamedAfterInternalTypesFixer
 - **Error Pattern:** Class name conflict with PHP internal types (Resource, Double, Number)
 - **Fix:** Change PHPDoc to use fully-qualified name
-- **Status:** Not implemented
+- **Status:** Implemented (see ClassesNamedAfterInternalTypesFixer)
 - **Reference:** PHPStan docs - Classes named after internal PHP types section
 
 ## Improvements Needed

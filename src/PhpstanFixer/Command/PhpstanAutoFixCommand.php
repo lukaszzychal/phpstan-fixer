@@ -33,6 +33,7 @@ use PhpstanFixer\Strategy\RequireImplementsFixer;
 use PhpstanFixer\Strategy\ArrayOffsetTypeFixer;
 use PhpstanFixer\Strategy\IterableValueTypeFixer;
 use PhpstanFixer\Strategy\InternalAnnotationFixer;
+use PhpstanFixer\Strategy\ClassesNamedAfterInternalTypesFixer;
 use PhpstanFixer\Strategy\UndefinedMethodFixer;
 use PhpstanFixer\Strategy\UndefinedPivotPropertyFixer;
 use PhpstanFixer\Strategy\UndefinedVariableFixer;
@@ -366,6 +367,7 @@ final class PhpstanAutoFixCommand extends Command
             new ArrayOffsetTypeFixer($analyzer, $docblockManipulator),
             new IterableValueTypeFixer($analyzer, $docblockManipulator),
             new InternalAnnotationFixer($analyzer, $docblockManipulator),
+            new ClassesNamedAfterInternalTypesFixer(),
         ];
 
         return new AutoFixService($strategies, $configuration);
