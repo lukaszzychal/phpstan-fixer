@@ -94,7 +94,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 11. **ArrayOffsetTypeFixer**
     - **Error Pattern:** "Unknown array offset types" / "Missing iterable value type"
     - **Fix:** Add generics to array types (e.g., `array<int, string>`)
-    - **Status:** Not implemented
+    - **Status:** Implemented (see ArrayOffsetTypeFixer)
     - **Priority:** Medium
     - **Reference:** PHPStan Level 5
 
