@@ -101,7 +101,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 12. **IterableValueTypeFixer**
     - **Error Pattern:** "Missing iterable value type"
     - **Fix:** Add value type to iterable (e.g., `iterable<string>`)
-    - **Status:** Not implemented
+    - **Status:** Implemented (see IterableValueTypeFixer)
     - **Priority:** Medium
     - **Reference:** PHPStan Level 5
 
