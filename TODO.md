@@ -63,7 +63,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ### 8. SealedClassFixer
 - **Error Pattern:** Class extends sealed class (PHPStan 2.1.18+)
 - **Fix:** Add `@phpstan-sealed Class1|Class2` tag
-- **Status:** Not implemented
+- **Status:** Implemented (see SealedClassFixer)
 - **Reference:** PHPStan docs - Sealed classes section
 
 ### 9. InternalAnnotationFixer
