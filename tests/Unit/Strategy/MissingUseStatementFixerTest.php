@@ -38,6 +38,40 @@ final class MissingUseStatementFixerTest extends TestCase
         $this->assertTrue($this->fixer->canFix($issue));
     }
 
+    public function testAddsUseForFullyQualifiedClass(): void
+    {
+        $tempFile = sys_get_temp_dir() . '/missing-use-' . uniqid() . '.php';
+        $fileContent = <<<'PHP'
+<?php
+
+namespace App;
+
+class Demo {
+    public function run(): void {
+        new Bar();
+    }
+}
+PHP;
+        file_put_contents($tempFile, $fileContent);
+
+        try {
+            $issue = new Issue(
+                $tempFile,
+                6,
+                'Class \\Vendor\\Package\\Bar not found'
+            );
+
+            $result = $this->fixer->fix($issue, $fileContent);
+
+            $this->assertTrue($result->isSuccessful());
+            $this->assertStringContainsString('use Vendor\\Package\\Bar;', $result->getFixedContent());
+        } finally {
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+        }
+    }
+
     public function testGetName(): void
     {
         $this->assertSame('MissingUseStatementFixer', $this->fixer->getName());

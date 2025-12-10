@@ -45,28 +45,26 @@ final class MissingUseStatementFixer implements FixStrategyInterface
             return FixResult::failure($issue, $fileContent, 'Could not parse file');
         }
 
-        // Extract class name from error message
+        // Extract class name (may be FQN) from error message
         $className = $this->extractClassName($issue->getMessage());
         if ($className === null) {
             return FixResult::failure($issue, $fileContent, 'Could not extract class name from error');
         }
 
-        // For now, we can't automatically determine the fully qualified name
-        // This would require symbol discovery or guessing
-        // So we'll attempt common patterns
-        
-        $namespace = $this->analyzer->getNamespace($ast);
+        $fullyQualified = ltrim($className, '\\');
+        $shortName = $this->getShortClassName($fullyQualified);
+
         $existingUses = $this->analyzer->getUseStatements($ast);
         
         // Check if use statement already exists
         foreach ($existingUses as $alias => $fullName) {
-            if ($alias === $className || $fullName === $className) {
-                return FixResult::failure($issue, $fileContent, "Use statement for {$className} already exists");
+            if ($alias === $shortName || $fullName === $fullyQualified) {
+                return FixResult::failure($issue, $fileContent, "Use statement for {$fullyQualified} already exists");
             }
             
             // Check if it's the last part of the FQN
             $parts = explode('\\', $fullName);
-            if (end($parts) === $className) {
+            if (end($parts) === $shortName) {
                 return FixResult::failure($issue, $fileContent, "Use statement for {$fullName} already exists (imported as {$alias})");
             }
         }
@@ -119,9 +117,8 @@ final class MissingUseStatementFixer implements FixStrategyInterface
             }
         }
 
-        // For now, we'll add a placeholder that needs manual fixing
-        // A more sophisticated implementation would try to resolve the class
-        $useStatement = "use {$className};";
+        // Add use statement using the best-known FQN (from the error message)
+        $useStatement = "use {$fullyQualified};";
         
         // Add blank line before if needed
         if ($insertIndex > 0 && trim($lines[$insertIndex - 1]) !== '') {
@@ -136,7 +133,7 @@ final class MissingUseStatementFixer implements FixStrategyInterface
         return FixResult::success(
             $issue,
             $fixedContent,
-            "Added use statement for {$className} (may need manual FQN correction)",
+            "Added use statement for {$fullyQualified}",
             ["Added use statement at line " . ($insertIndex + 1)]
         );
     }
@@ -167,6 +164,12 @@ final class MissingUseStatementFixer implements FixStrategyInterface
         }
 
         return null;
+    }
+
+    private function getShortClassName(string $fqn): string
+    {
+        $parts = explode('\\', $fqn);
+        return (string) end($parts);
     }
 }
 
