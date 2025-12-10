@@ -30,6 +30,7 @@ use PhpstanFixer\Strategy\PrefixedTagsFixer;
 use PhpstanFixer\Strategy\ReadonlyPropertyFixer;
 use PhpstanFixer\Strategy\RequireExtendsFixer;
 use PhpstanFixer\Strategy\RequireImplementsFixer;
+use PhpstanFixer\Strategy\ArrayOffsetTypeFixer;
 use PhpstanFixer\Strategy\UndefinedMethodFixer;
 use PhpstanFixer\Strategy\UndefinedPivotPropertyFixer;
 use PhpstanFixer\Strategy\UndefinedVariableFixer;
@@ -360,6 +361,7 @@ final class PhpstanAutoFixCommand extends Command
             new ImpureFunctionFixer($analyzer, $docblockManipulator),
             new RequireExtendsFixer($analyzer, $docblockManipulator),
             new RequireImplementsFixer($analyzer, $docblockManipulator),
+            new ArrayOffsetTypeFixer($analyzer, $docblockManipulator),
         ];
 
         return new AutoFixService($strategies, $configuration);

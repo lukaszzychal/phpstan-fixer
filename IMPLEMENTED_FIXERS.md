@@ -108,6 +108,11 @@
 - **Naprawa:** Zmienia PHPDoc na fully-qualified name
 - **Status:** NIE zaimplementowane
 
+#### 11. ✅ ArrayOffsetTypeFixer
+- **Błąd:** \"Unknown array offset types\" / \"Missing iterable value type\"
+- **Naprawa:** Dodaje generyki do tablic (np. `array<int, string>`)
+- **Status:** Zaimplementowane
+
 ---
 
 ## 🟡 Częściowo zaimplementowane / Wymagają poprawy
