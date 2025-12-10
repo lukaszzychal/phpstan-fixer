@@ -107,6 +107,7 @@ final class DocblockManipulator
             'phpstan-return' => [],
             'phpstan-impure' => [],
             'phpstan-pure' => [],
+            'phpstan-require-extends' => [],
         ];
 
         // Remove /** and */ markers
@@ -228,6 +229,16 @@ final class DocblockManipulator
             case 'phpstan-impure':
             case 'phpstan-pure':
                 return ['flag' => true];
+
+            case 'phpstan-require-extends':
+                // @phpstan-require-extends ClassName
+                if (preg_match('/^([\\\\\w]+)(?:\s+(.+))?$/', $value, $matches)) {
+                    return [
+                        'className' => $matches[1],
+                        'description' => $matches[2] ?? null,
+                    ];
+                }
+                break;
         }
 
         return ['raw' => $value];
@@ -327,6 +338,7 @@ final class DocblockManipulator
             'phpstan-return',
             'phpstan-impure',
             'phpstan-pure',
+            'phpstan-require-extends',
             'throws',
             'var',
             'property',
@@ -448,6 +460,13 @@ final class DocblockManipulator
             case 'phpstan-impure':
             case 'phpstan-pure':
                 return '';
+
+            case 'phpstan-require-extends':
+                $result = $data['className'] ?? '';
+                if (isset($data['description'])) {
+                    $result .= ' ' . $data['description'];
+                }
+                return trim($result);
         }
 
         return $data['raw'] ?? '';
