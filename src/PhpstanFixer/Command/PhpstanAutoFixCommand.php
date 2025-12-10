@@ -28,6 +28,8 @@ use PhpstanFixer\Strategy\MissingUseStatementFixer;
 use PhpstanFixer\Strategy\MixinFixer;
 use PhpstanFixer\Strategy\PrefixedTagsFixer;
 use PhpstanFixer\Strategy\ReadonlyPropertyFixer;
+use PhpstanFixer\Strategy\SealedClassFixer;
+use PhpstanFixer\Strategy\ImmutableClassFixer;
 use PhpstanFixer\Strategy\RequireExtendsFixer;
 use PhpstanFixer\Strategy\RequireImplementsFixer;
 use PhpstanFixer\Strategy\ArrayOffsetTypeFixer;
@@ -363,6 +365,8 @@ final class PhpstanAutoFixCommand extends Command
             new MixinFixer($analyzer, $docblockManipulator),
             new PrefixedTagsFixer($analyzer, $docblockManipulator),
             new ImpureFunctionFixer($analyzer, $docblockManipulator),
+            new ImmutableClassFixer($analyzer, $docblockManipulator),
+            new SealedClassFixer($analyzer, $docblockManipulator),
             new RequireExtendsFixer($analyzer, $docblockManipulator),
             new RequireImplementsFixer($analyzer, $docblockManipulator),
             new ArrayOffsetTypeFixer($analyzer, $docblockManipulator),

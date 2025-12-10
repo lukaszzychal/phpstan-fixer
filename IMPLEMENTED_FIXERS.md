@@ -88,15 +88,15 @@
 - **Naprawa:** Dodaje `@readonly` tag na property
 - **Status:** NIE zaimplementowane
 
-#### 7. ❌ ImmutableClassFixer
+#### 7. ✅ ImmutableClassFixer
 - **Błąd:** Property assigned outside of immutable class
 - **Naprawa:** Dodaje `@immutable` lub `@readonly` na klasie
-- **Status:** NIE zaimplementowane
+- **Status:** Zaimplementowane
 
-#### 8. ❌ SealedClassFixer
+#### 8. ✅ SealedClassFixer
 - **Błąd:** Class extends sealed class (PHPStan 2.1.18+)
 - **Naprawa:** Dodaje `@phpstan-sealed Class1|Class2`
-- **Status:** NIE zaimplementowane
+- **Status:** Zaimplementowane
 
 #### 9. ✅ PrefixedTagsFixer
 - **Błąd:** Advanced types not understood by IDEs
