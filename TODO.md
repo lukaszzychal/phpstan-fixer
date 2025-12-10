@@ -69,7 +69,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ### 9. InternalAnnotationFixer
 - **Error Pattern:** Access to internal element
 - **Fix:** Add `@internal` tag (rarely needed automatically)
-- **Status:** Not implemented
+- **Status:** Implemented (see InternalAnnotationFixer)
 - **Reference:** PHPStan docs - Internal symbols section
 
 ### 10. ClassesNamedAfterInternalTypesFixer
