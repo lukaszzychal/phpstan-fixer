@@ -78,10 +78,10 @@
 - **Naprawa:** Dodaje `@phpstan-require-extends ClassName` na interfejsie/trait
 - **Status:** Zaimplementowane
 
-#### 5. ❌ RequireImplementsFixer
+#### 5. ✅ RequireImplementsFixer
 - **Błąd:** Trait wymaga implementacji interfejsu
 - **Naprawa:** Dodaje `@phpstan-require-implements InterfaceName` na trait
-- **Status:** NIE zaimplementowane
+- **Status:** Zaimplementowane
 
 #### 6. ❌ ReadonlyPropertyFixer
 - **Błąd:** Property assigned outside of declaring class (PHP < 8.1)

@@ -49,7 +49,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ### 6. RequireImplementsFixer
 - **Error Pattern:** Trait requires interface implementation
 - **Fix:** Add `@phpstan-require-implements InterfaceName` on trait
-- **Status:** Not implemented
+- **Status:** Implemented (see RequireImplementsFixer)
 - **Reference:** PHPStan docs - Enforcing implementing interface section
 
 ## Low Priority
