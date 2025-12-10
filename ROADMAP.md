@@ -7,7 +7,7 @@ This document outlines future plans and ideas for PHPStan Fixer.
 ### High Priority
 - [ ] **MixinFixer** - Add `@mixin` support for delegated methods
 - [ ] **ReadonlyPropertyFixer** - Add `@readonly` tag support (PHP < 8.1)
-- [ ] **PrefixedTagsFixer** - Support `@phpstan-param`, `@phpstan-return` for advanced types
+- [x] **PrefixedTagsFixer** - Support `@phpstan-param`, `@phpstan-return` for advanced types
 - [ ] **Improved MissingUseStatementFixer** - Better FQN resolution with symbol discovery
 - [ ] **Per-Error Configuration System** - Configure how each error type is handled:
   - Fix (default) - Attempt automatic fix
@@ -15,8 +15,8 @@ This document outlines future plans and ideas for PHPStan Fixer.
   - Report - Pass through to output without fixing
 
 ### Medium Priority
-- [ ] **ArrayOffsetTypeFixer** - Add generics to array types (Level 5)
-- [ ] **IterableValueTypeFixer** - Add value types to iterable (Level 5)
+- [x] **ArrayOffsetTypeFixer** - Add generics to array types (Level 5)
+- [x] **IterableValueTypeFixer** - Add value types to iterable (Level 5)
 - [ ] **CLI Command tests** - Add comprehensive command testing
 - [ ] **Configuration file** - YAML/JSON config file support (`phpstan-fixer.yaml`)
 

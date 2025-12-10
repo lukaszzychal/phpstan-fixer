@@ -57,7 +57,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ### 7. ImmutableClassFixer
 - **Error Pattern:** Property assigned outside of immutable class
 - **Fix:** Add `@immutable` or `@readonly` tag on class
-- **Status:** Not implemented
+- **Status:** Implemented (see ImmutableClassFixer)
 - **Reference:** PHPStan docs - Immutable classes section
 
 ### 8. SealedClassFixer

@@ -1,6 +1,6 @@
 # Zaimplementowane Fixery vs Dokumentacja PHPStan
 
-## ✅ Zaimplementowane Fixery (10)
+## ✅ Zaimplementowane Fixery (21)
 
 ### 1. ✅ MissingReturnDocblockFixer
 - **Błąd:** "Function has no return type specified" / "Method has no return type"
@@ -153,9 +153,9 @@
 ## 📊 Podsumowanie
 
 ### Statystyki:
-- ✅ **Zaimplementowane:** 10 fixerów
-- ❌ **Możliwe do dodania:** ~10 dodatkowych fixerów z dokumentacji
-- 🟡 **Wymagają poprawy:** 1 fixer
+- ✅ **Zaimplementowane:** 21 fixerów
+- ❌ **Możliwe do dodania:** ~8 dodatkowych fixerów z dokumentacji
+- 🟡 **Wymagają poprawy:** 1 fixer (MissingUseStatementFixer – rozszerzenie FQN)
 - 🔵 **Trudne/Ryzykowne:** 4+ typy błędów
 
 ### Główne pokrycie:
