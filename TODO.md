@@ -81,11 +81,8 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ## Improvements Needed
 
 ### MissingUseStatementFixer Enhancement
-- **Current Status:** Basic implementation works, but:
-  - Does not automatically resolve fully-qualified class names
-  - Requires manual FQN correction in some cases
-  - Does not search vendor/ for class discovery
-- **Enhancement:** Add symbol discovery mechanism
+- **Current Status:** Implemented with FQN extraction and vendor/src discovery; may be extended later with richer symbol resolution.
+- **Enhancement:** Add symbol discovery mechanism ✅
 
 ## From PHPStan Levels Analysis
 
@@ -151,12 +148,12 @@ rules:
 ```
 
 **Implementation tasks:**
-- [ ] Create configuration file parser
-- [ ] Add configuration loading to AutoFixService
-- [ ] Implement ignore action (skip processing)
-- [ ] Implement report action (pass through to output)
-- [ ] Add validation for configuration
-- [ ] Add documentation for configuration
+- [x] Create configuration file parser
+- [x] Add configuration loading to AutoFixService
+- [x] Implement ignore action (skip processing)
+- [x] Implement report action (pass through to output)
+- [x] Add validation for configuration
+- [x] Add documentation for configuration
 
 ## Known Issues / Bugs to Fix
 
