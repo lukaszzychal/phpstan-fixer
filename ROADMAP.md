@@ -18,7 +18,7 @@ This document outlines future plans and ideas for PHPStan Fixer.
 - [x] **ArrayOffsetTypeFixer** - Add generics to array types (Level 5)
 - [x] **IterableValueTypeFixer** - Add value types to iterable (Level 5)
 - [ ] **CLI Command tests** - Add comprehensive command testing
-- [ ] **Configuration file** - YAML/JSON config file support (`phpstan-fixer.yaml`)
+- [x] **Configuration file** - YAML/JSON config file support (`phpstan-fixer.yaml`)
 
 ## Version 1.2.0 (Medium-term)
 

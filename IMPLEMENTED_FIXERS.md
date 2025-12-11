@@ -34,8 +34,8 @@
 
 ### 7. ✅ MissingUseStatementFixer
 - **Błąd:** "Class X not found" / "Cannot resolve symbol"
-- **Naprawa:** Dodaje `use Fully\Qualified\ClassName;`
-- **Status:** Zaimplementowane (podstawowa wersja - może wymagać ręcznej korekty FQN)
+- **Naprawa:** Dodaje `use Fully\Qualified\ClassName;` z FQN wyciąganym z komunikatu lub odkrytym w `src/`/`vendor/`
+- **Status:** Zaimplementowane (z discovery FQN)
 
 ### 8. ✅ UndefinedMethodFixer
 - **Błąd:** "Call to an undefined method"
