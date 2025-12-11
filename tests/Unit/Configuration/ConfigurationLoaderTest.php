@@ -192,6 +192,66 @@ YAML;
         $this->loader->loadFromFile($filePath);
     }
 
+    public function testThrowsWhenRuleHasInvalidAction(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "rules": {
+    "Some pattern": {
+      "action": "skip"
+    }
+  }
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid action "skip" for pattern "Some pattern"');
+
+        $this->loader->loadFromFile($filePath);
+    }
+
+    public function testThrowsWhenRuleMissingAction(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "rules": {
+    "Some pattern": {
+      "note": "missing action"
+    }
+  }
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Rule for pattern "Some pattern" must be a string action or object with "action"');
+
+        $this->loader->loadFromFile($filePath);
+    }
+
+    public function testThrowsWhenDefaultActionIsInvalid(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "rules": {},
+  "default": "skip"
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid action "skip" for pattern "default"');
+
+        $this->loader->loadFromFile($filePath);
+    }
+
     private function removeDirectory(string $dir): void
     {
         if (!is_dir($dir)) {
