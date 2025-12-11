@@ -51,17 +51,17 @@ final class MissingUseStatementFixer implements FixStrategyInterface
             return FixResult::failure($issue, $fileContent, 'Could not extract class name from error');
         }
 
-        $fullyQualified = ltrim($className, '\\');
+        $fullyQualified = $this->resolveFullyQualifiedClassName($className, $issue->getFilePath());
         $shortName = $this->getShortClassName($fullyQualified);
 
         $existingUses = $this->analyzer->getUseStatements($ast);
-        
+
         // Check if use statement already exists
         foreach ($existingUses as $alias => $fullName) {
             if ($alias === $shortName || $fullName === $fullyQualified) {
                 return FixResult::failure($issue, $fileContent, "Use statement for {$fullyQualified} already exists");
             }
-            
+
             // Check if it's the last part of the FQN
             $parts = explode('\\', $fullName);
             if (end($parts) === $shortName) {
@@ -69,10 +69,6 @@ final class MissingUseStatementFixer implements FixStrategyInterface
             }
         }
 
-        // Try to infer FQN - this is a simplified approach
-        // In a real implementation, you might want to search vendor/ directories
-        // or use a symbol discovery mechanism
-        
         $lines = explode("\n", $fileContent);
         
         // Find namespace line
@@ -117,7 +113,7 @@ final class MissingUseStatementFixer implements FixStrategyInterface
             }
         }
 
-        // Add use statement using the best-known FQN (from the error message)
+        // Add use statement using the best-known FQN (from the error message or discovery)
         $useStatement = "use {$fullyQualified};";
         
         // Add blank line before if needed
@@ -170,6 +166,102 @@ final class MissingUseStatementFixer implements FixStrategyInterface
     {
         $parts = explode('\\', $fqn);
         return (string) end($parts);
+    }
+
+    private function resolveFullyQualifiedClassName(string $className, string $filePath): string
+    {
+        $candidate = ltrim($className, '\\');
+
+        if (str_contains($candidate, '\\')) {
+            return $candidate;
+        }
+
+        $discovered = $this->discoverClass($candidate, $filePath);
+
+        if ($discovered !== null) {
+            return $discovered;
+        }
+
+        return $candidate;
+    }
+
+    private function discoverClass(string $shortName, string $filePath): ?string
+    {
+        $projectRoot = $this->findProjectRoot($filePath);
+
+        $searchDirs = array_filter([
+            $projectRoot . '/src',
+            $projectRoot . '/vendor',
+        ], static fn(string $dir) => is_dir($dir));
+
+        foreach ($searchDirs as $dir) {
+            $fqn = $this->findClassInDirectory($dir, $shortName);
+            if ($fqn !== null) {
+                return $fqn;
+            }
+        }
+
+        return null;
+    }
+
+    private function findClassInDirectory(string $directory, string $shortName): ?string
+    {
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $fileInfo) {
+            if (!$fileInfo->isFile()) {
+                continue;
+            }
+
+            if (strtolower($fileInfo->getBasename()) !== strtolower($shortName . '.php')) {
+                continue;
+            }
+
+            $namespace = $this->extractNamespaceFromFile($fileInfo->getPathname());
+
+            if ($namespace !== null) {
+                return $namespace . '\\' . $shortName;
+            }
+
+            return $shortName;
+        }
+
+        return null;
+    }
+
+    private function extractNamespaceFromFile(string $filePath): ?string
+    {
+        $content = file_get_contents($filePath);
+        if ($content === false) {
+            return null;
+        }
+
+        if (preg_match('/^\s*namespace\s+([^;]+);/m', $content, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return null;
+    }
+
+    private function findProjectRoot(string $filePath): string
+    {
+        $dir = realpath(dirname($filePath));
+
+        while ($dir !== false && $dir !== DIRECTORY_SEPARATOR) {
+            if (file_exists($dir . '/composer.json')) {
+                return $dir;
+            }
+
+            $parent = dirname($dir);
+            if ($parent === $dir) {
+                break;
+            }
+            $dir = $parent;
+        }
+
+        return realpath(dirname($filePath)) ?: dirname($filePath);
     }
 }
 
