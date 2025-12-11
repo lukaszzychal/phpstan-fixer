@@ -17,13 +17,13 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ### 1. MixinFixer
 - **Error Pattern:** Methods delegated via `__call` / `__get` / `__set`
 - **Fix:** Add `@mixin ClassName` on class
-- **Status:** Not implemented
+- **Status:** Implemented (see MixinFixer)
 - **Reference:** PHPStan docs - Mixins section
 
 ### 2. ReadonlyPropertyFixer
 - **Error Pattern:** Property assigned outside of declaring class (PHP < 8.1)
 - **Fix:** Add `@readonly` tag on property
-- **Status:** Not implemented
+- **Status:** Implemented (see ReadonlyPropertyFixer)
 - **Reference:** PHPStan docs - Readonly properties section
 
 ### 3. PrefixedTagsFixer
@@ -57,7 +57,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ### 7. ImmutableClassFixer
 - **Error Pattern:** Property assigned outside of immutable class
 - **Fix:** Add `@immutable` or `@readonly` tag on class
-- **Status:** Not implemented
+- **Status:** Implemented (see ImmutableClassFixer)
 - **Reference:** PHPStan docs - Immutable classes section
 
 ### 8. SealedClassFixer
