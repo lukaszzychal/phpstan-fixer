@@ -1,6 +1,6 @@
 # Zaimplementowane Fixery vs Dokumentacja PHPStan
 
-## ✅ Zaimplementowane Fixery (10)
+## ✅ Zaimplementowane Fixery (aktualne)
 
 ### 1. ✅ MissingReturnDocblockFixer
 - **Błąd:** "Function has no return type specified" / "Method has no return type"
@@ -34,8 +34,8 @@
 
 ### 7. ✅ MissingUseStatementFixer
 - **Błąd:** "Class X not found" / "Cannot resolve symbol"
-- **Naprawa:** Dodaje `use Fully\Qualified\ClassName;`
-- **Status:** Zaimplementowane (podstawowa wersja - może wymagać ręcznej korekty FQN)
+- **Naprawa:** Dodaje `use Fully\Qualified\ClassName;` z FQN wyciąganym z komunikatu lub odkrytym w `src/`/`vendor/`
+- **Status:** Zaimplementowane (z discovery FQN)
 
 ### 8. ✅ UndefinedMethodFixer
 - **Błąd:** "Call to an undefined method"
@@ -58,10 +58,10 @@
 
 ### Z dokumentacji PHPDocs Basics:
 
-#### 1. ❌ MixinFixer
+#### 1. ✅ MixinFixer
 - **Błąd:** Delegacja metod przez `__call` / `__get` / `__set`
 - **Naprawa:** Dodaje `@mixin ClassName` na klasie
-- **Status:** NIE zaimplementowane
+- **Status:** Zaimplementowane
 
 #### 2. ✅ InternalAnnotationFixer
 - **Błąd:** "Access to internal element"
@@ -83,10 +83,10 @@
 - **Naprawa:** Dodaje `@phpstan-require-implements InterfaceName` na trait
 - **Status:** Zaimplementowane
 
-#### 6. ❌ ReadonlyPropertyFixer
+#### 6. ✅ ReadonlyPropertyFixer
 - **Błąd:** Property assigned outside of declaring class (PHP < 8.1)
 - **Naprawa:** Dodaje `@readonly` tag na property
-- **Status:** NIE zaimplementowane
+- **Status:** Zaimplementowane
 
 #### 7. ✅ ImmutableClassFixer
 - **Błąd:** Property assigned outside of immutable class
