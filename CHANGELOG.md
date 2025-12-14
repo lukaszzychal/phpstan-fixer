@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-12-14
+
+### Fixed
+- **Laravel compatibility**: Added `dont-discover` flag to `composer.json` to prevent Laravel from auto-discovering this package during `package:discover` (fixes #60)
+
+### Enhanced
+- **MissingUseStatementFixer**: Added support for additional error patterns:
+  - "Unknown class"
+  - "Class X is undefined"
+  - "Instantiated class X not found"
+  - "Referenced class X not found"
+  - "Cannot resolve symbol"
+  - Added comprehensive tests for all new patterns (fixes #15)
+
+### Verified
+- All high priority fixers are implemented and tested (MixinFixer, ReadonlyPropertyFixer, PrefixedTagsFixer) - fixes #18
+- All medium priority fixers are implemented and tested (ImpureFunctionFixer, RequireExtendsFixer, RequireImplementsFixer, ArrayOffsetTypeFixer, IterableValueTypeFixer) - fixes #14
+
+[1.2.1]: https://github.com/lukaszzychal/phpstan-fixer/releases/tag/v1.2.1
+
 ## [1.0.0] - 2025-12-06
 
 ### Added
