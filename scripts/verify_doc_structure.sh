@@ -28,8 +28,12 @@ if [ ! -f "$PL_FILE" ]; then
 fi
 
 # Extract headers from both files (preserving level)
-EN_HEADERS=$(grep -E '^#{1,6}\s+' "$EN_FILE" | sed 's/^#*/#/')
-PL_HEADERS=$(grep -E '^#{1,6}\s+' "$PL_FILE" | sed 's/^#*/#/')
+EN_HEADERS_RAW=$(grep -E '^#{1,6}\s+' "$EN_FILE")
+PL_HEADERS_RAW=$(grep -E '^#{1,6}\s+' "$PL_FILE")
+
+# Normalized headers for display/counting
+EN_HEADERS=$(echo "$EN_HEADERS_RAW" | sed 's/^#*/#/')
+PL_HEADERS=$(echo "$PL_HEADERS_RAW" | sed 's/^#*/#/')
 
 # Count headers
 EN_COUNT=$(echo "$EN_HEADERS" | grep -c '^#' || echo "0")
@@ -55,14 +59,16 @@ if [ "$EN_COUNT" -ne "$PL_COUNT" ]; then
 fi
 
 # Check header structure (levels should match)
-EN_LEVELS=$(echo "$EN_HEADERS" | sed 's/#.*//' | sed 's/^#*//' | wc -c | tr -d ' ')
-PL_LEVELS=$(echo "$PL_HEADERS" | sed 's/#.*//' | sed 's/^#*//' | wc -c | tr -d ' ')
+# Extract level sequence: count # characters for each header
+EN_LEVEL_SEQ=$(echo "$EN_HEADERS_RAW" | sed 's/^\(#*\).*/\1/' | while IFS= read -r line; do echo -n "${#line} "; done)
+PL_LEVEL_SEQ=$(echo "$PL_HEADERS_RAW" | sed 's/^\(#*\).*/\1/' | while IFS= read -r line; do echo -n "${#line} "; done)
 
-if [ "$EN_LEVELS" != "$PL_LEVELS" ]; then
+if [ "$EN_LEVEL_SEQ" != "$PL_LEVEL_SEQ" ]; then
     echo "⚠️  Warning: Header structure may differ (level sequence)"
     echo "   This is a soft check - verify manually if needed"
+    echo "   English levels: $EN_LEVEL_SEQ"
+    echo "   Polish levels:  $PL_LEVEL_SEQ"
 fi
 
 echo "✅ Structure is consistent: $EN_COUNT headers in both versions"
 exit 0
-
