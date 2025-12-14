@@ -126,7 +126,6 @@ Skrypt porównuje:
 ./scripts/verify_doc_structure.sh docs/FRAMEWORK_DETECTION.md
 ```
 
-
 ## Lista Dokumentów Do Weryfikacji
 
 Zobacz [V1.2.0_IMPLEMENTATION_PLAN.md](../V1.2.0_IMPLEMENTATION_PLAN.md) dla pełnej listy dokumentów wymagających weryfikacji lub tłumaczenia.

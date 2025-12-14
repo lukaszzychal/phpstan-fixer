@@ -525,6 +525,9 @@ final class DocblockManipulator
             'return', 'phpstan-return' => $this->reconstructReturnAnnotation($data),
             'var' => $this->reconstructVarAnnotation($data),
             'property', 'property-read', 'property-write' => $this->reconstructPropertyAnnotation($data),
+            'throws' => $this->reconstructThrowsAnnotation($data),
+            'method' => $this->reconstructMethodAnnotation($data),
+            'mixin' => $this->reconstructMixinAnnotation($data),
             'phpstan-impure', 'phpstan-pure' => '',
             'phpstan-require-extends' => $this->reconstructClassNameAnnotation($data, 'className'),
             'phpstan-require-implements' => $this->reconstructClassNameAnnotation($data, 'className'),
@@ -621,6 +624,60 @@ final class DocblockManipulator
     private function reconstructSealedAnnotation(array $data): string
     {
         $result = $data['classList'] ?? '';
+        if (isset($data['description'])) {
+            $result .= ' ' . $data['description'];
+        }
+        return trim($result);
+    }
+
+    /**
+     * Reconstruct @throws annotation string.
+     *
+     * @param array<string, mixed> $data Parsed annotation data
+     * @return string
+     */
+    private function reconstructThrowsAnnotation(array $data): string
+    {
+        $result = $data['exception'] ?? '';
+        if (isset($data['description'])) {
+            $result .= ' ' . $data['description'];
+        }
+        return trim($result);
+    }
+
+    /**
+     * Reconstruct @method annotation string.
+     *
+     * @param array<string, mixed> $data Parsed annotation data
+     * @return string
+     */
+    private function reconstructMethodAnnotation(array $data): string
+    {
+        $result = '';
+        if (isset($data['static']) && $data['static']) {
+            $result .= 'static ';
+        }
+        $result .= $data['returnType'] ?? 'void';
+        if (isset($data['name'])) {
+            $result .= ' ' . $data['name'];
+        }
+        $parameters = $data['parameters'] ?? '';
+        $result .= '(' . $parameters . ')';
+        if (isset($data['description'])) {
+            $result .= ' ' . $data['description'];
+        }
+        return trim($result);
+    }
+
+    /**
+     * Reconstruct @mixin annotation string.
+     *
+     * @param array<string, mixed> $data Parsed annotation data
+     * @return string
+     */
+    private function reconstructMixinAnnotation(array $data): string
+    {
+        $result = $data['className'] ?? '';
         if (isset($data['description'])) {
             $result .= ' ' . $data['description'];
         }
