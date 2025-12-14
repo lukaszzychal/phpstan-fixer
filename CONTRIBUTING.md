@@ -84,6 +84,16 @@ vendor/bin/phpstan analyse
 - Add examples where helpful
 - Keep documentation in sync with code
 
+### Bilingual Documentation
+
+This project supports bilingual documentation (English and Polish). When creating or updating documentation:
+
+- **See**: [Bilingual Documentation Guidelines](docs/BILINGUAL_DOCUMENTATION_GUIDELINES.md) for detailed instructions
+- **File naming**: Use `DOCUMENT_NAME.md` (EN) and `DOCUMENT_NAME_PL.md` (PL)
+- **Always update both versions** when making changes
+- **Include language links** at the top of each document
+- **Maintain structural consistency** between language versions
+
 ## Questions?
 
 Open an issue or start a discussion on GitHub!
