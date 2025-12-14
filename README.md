@@ -280,6 +280,52 @@ The tool works out of the box with default settings. All fix strategies are enab
 - PHPStan (installed via Composer)
 - nikic/php-parser (automatically installed)
 
+## Troubleshooting
+
+### Framework Compatibility Notice
+
+**⚠️ Important:** This package is **framework-agnostic** and is not officially tested or supported with specific frameworks like Laravel, Symfony, etc.
+
+- **Laravel:** Not officially supported. Use with caution. See Laravel-specific issues below.
+- **Other frameworks (Symfony, CodeIgniter, CakePHP, etc.):** Use with caution. Framework-specific features may not work as expected.
+
+If you encounter framework-specific issues, please report them via [GitHub Issues](https://github.com/lukaszzychal/phpstan-fixer/issues).
+
+### Laravel package:discover Error
+
+**Problem:** Error `Call to a member function make() on null` occurs during `package:discover` in Laravel.
+
+**Solution:** In version v1.2.2+, the package has correctly configured `dont-discover` as an array in `composer.json`:
+
+```json
+{
+  "extra": {
+    "laravel": {
+      "dont-discover": []
+    }
+  }
+}
+```
+
+This should prevent Laravel from auto-discovering the package during `package:discover`.
+
+**If the problem persists:**
+
+If you still encounter the error, it may be related to how Laravel initializes the container during `package:discover`. In that case, you can use a workaround:
+
+1. **Ensure you're using v1.2.2+**:
+   ```bash
+   composer require --dev lukaszzychal/phpstan-fixer:^1.2.2
+   ```
+
+2. **Check the package's `composer.json`** in `vendor/lukaszzychal/phpstan-fixer/composer.json`:
+   - Should be: `"dont-discover": []` (array)
+   - Should NOT be: `"dont-discover": true` (boolean)
+
+**Related Issues:**
+- [Issue #60](https://github.com/lukaszzychal/phpstan-fixer/issues/60) - Original bug report
+- [Issue #63](https://github.com/lukaszzychal/phpstan-fixer/issues/63) - Fix (boolean → array)
+
 ## Development
 
 ### Running Tests
