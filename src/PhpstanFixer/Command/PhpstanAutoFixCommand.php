@@ -506,7 +506,7 @@ final class PhpstanAutoFixCommand extends Command
         foreach ($customFixers as $fixerClass) {
             try {
                 $strategies[] = $factory->createFixer($fixerClass);
-            } catch (\RuntimeException $e) {
+            } catch (\ReflectionException | \RuntimeException $e) {
                 throw new \RuntimeException(
                     "Failed to load custom fixer {$fixerClass}: " . $e->getMessage(),
                     0,
