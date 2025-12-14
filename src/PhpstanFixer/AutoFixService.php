@@ -189,16 +189,25 @@ final class AutoFixService
     {
         $groupedIssues = $this->groupIssuesByFile($issues);
         $results = [];
-        $totalFiles = count($groupedIssues);
+        
+        // Filter to only processable files and count them for accurate progress reporting
+        // This ensures progress callback reports correct totals even when files are skipped
+        $processableFiles = [];
+        foreach ($groupedIssues as $filePath => $fileIssues) {
+            if (file_exists($filePath)) {
+                $processableFiles[$filePath] = $fileIssues;
+            }
+        }
+        
+        $totalFiles = count($processableFiles);
         $processedFiles = 0;
 
-        foreach ($groupedIssues as $filePath => $fileIssues) {
-            if (!file_exists($filePath)) {
-                continue;
-            }
-
+        foreach ($processableFiles as $filePath => $fileIssues) {
             $fileContent = file_get_contents($filePath);
             if ($fileContent === false) {
+                // Skip files that can't be read (even though they exist)
+                // This shouldn't happen often, but handle it gracefully
+                $totalFiles--;
                 continue;
             }
 
