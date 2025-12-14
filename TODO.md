@@ -81,7 +81,7 @@ See [ROADMAP.md](ROADMAP.md) for detailed planning.
 ## Improvements Needed
 
 ### MissingUseStatementFixer Enhancement
-- **Current Status:** Implemented with FQN extraction and vendor/src discovery; may be extended later with richer symbol resolution.
+- **Current Status:** Implemented with FQN extraction and vendor/src discovery ✅
 - **Enhancement:** Add symbol discovery mechanism ✅
 
 ## From PHPStan Levels Analysis
