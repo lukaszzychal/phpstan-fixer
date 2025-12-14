@@ -188,6 +188,52 @@ Narzędzie działa od razu z domyślnymi ustawieniami. Wszystkie strategie napra
 - PHPStan (zainstalowany przez Composer)
 - nikic/php-parser (instalowany automatycznie)
 
+## Rozwiązywanie Problemów
+
+### Uwaga dotycząca kompatybilności z frameworkami
+
+**⚠️ Ważne:** Ten pakiet jest **framework-agnostic** i nie jest oficjalnie testowany ani wspierany z konkretnymi frameworkami takimi jak Laravel, Symfony, itp.
+
+- **Laravel:** Nie jest oficjalnie wspierany. Używaj z ostrożnością. Zobacz problemy specyficzne dla Laravel poniżej.
+- **Inne frameworki (Symfony, CodeIgniter, CakePHP, itp.):** Używaj z ostrożnością. Funkcje specyficzne dla frameworków mogą nie działać zgodnie z oczekiwaniami.
+
+Jeśli napotkasz problemy specyficzne dla frameworków, zgłoś je przez [GitHub Issues](https://github.com/lukaszzychal/phpstan-fixer/issues).
+
+### Błąd Laravel package:discover
+
+**Problem:** Błąd `Call to a member function make() on null` występuje podczas `package:discover` w Laravel.
+
+**Rozwiązanie:** W wersji v1.2.2+ pakiet ma poprawnie skonfigurowany `dont-discover` jako tablicę w `composer.json`:
+
+```json
+{
+  "extra": {
+    "laravel": {
+      "dont-discover": []
+    }
+  }
+}
+```
+
+To powinno zapobiec automatycznemu wykrywaniu pakietu przez Laravel podczas `package:discover`.
+
+**Jeśli problem nadal występuje:**
+
+Jeśli nadal występuje błąd, może to być związane z tym, jak Laravel inicjalizuje kontener podczas `package:discover`. W takim przypadku możesz użyć workaround:
+
+1. **Upewnij się, że używasz v1.2.2+**:
+   ```bash
+   composer require --dev lukaszzychal/phpstan-fixer:^1.2.2
+   ```
+
+2. **Sprawdź `composer.json` pakietu** w `vendor/lukaszzychal/phpstan-fixer/composer.json`:
+   - Powinno być: `"dont-discover": []` (tablica)
+   - Nie powinno być: `"dont-discover": true` (boolean)
+
+**Powiązane issue:**
+- [Issue #60](https://github.com/lukaszzychal/phpstan-fixer/issues/60) - Pierwotny raport błędu
+- [Issue #63](https://github.com/lukaszzychal/phpstan-fixer/issues/63) - Poprawka (boolean → array)
+
 ## Rozwój
 
 ### Uruchamianie Testów
