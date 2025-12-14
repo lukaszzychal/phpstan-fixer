@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.3] - 2025-12-14
+
+### Documentation
+- **Framework compatibility notice**: Added warning that Laravel is not officially supported
+- Added caution notice for other frameworks (Symfony, CodeIgniter, CakePHP, etc.)
+- Updated Troubleshooting section in README (EN/PL) with framework compatibility information
+
+[1.2.3]: https://github.com/lukaszzychal/phpstan-fixer/releases/tag/v1.2.3
+
 ## [1.2.2] - 2025-12-14
 
 ### Fixed
