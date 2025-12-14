@@ -147,120 +147,195 @@ final class DocblockManipulator
      */
     private function parseAnnotationValue(string $tag, string $value): array
     {
-        switch ($tag) {
-            case 'param':
-            case 'phpstan-param':
-                // @param Type $name Description
-                if (preg_match('/^([^\s$]+)\s+(\$\w+)(?:\s+(.+))?$/', $value, $matches)) {
-                    return [
-                        'type' => $matches[1],
-                        'name' => $matches[2],
-                        'description' => $matches[3] ?? null,
-                    ];
-                }
-                break;
+        return match ($tag) {
+            'param', 'phpstan-param' => $this->parseParamAnnotation($value),
+            'var' => $this->parseVarAnnotation($value),
+            'return', 'phpstan-return' => $this->parseReturnAnnotation($value),
+            'throws' => $this->parseThrowsAnnotation($value),
+            'property', 'property-read', 'property-write' => $this->parsePropertyAnnotation($value),
+            'method' => $this->parseMethodAnnotation($value),
+            'mixin' => $this->parseMixinAnnotation($value),
+            'phpstan-impure', 'phpstan-pure' => ['flag' => true],
+            'phpstan-require-extends' => $this->parseClassNameAnnotation($value, 'className'),
+            'phpstan-require-implements' => $this->parseClassNameAnnotation($value, 'className'),
+            'phpstan-sealed' => $this->parseSealedAnnotation($value),
+            default => ['raw' => $value],
+        };
+    }
 
-            case 'var':
-                // @var Type $name or @var Type
-                if (preg_match('/^([^\s$]+)(?:\s+(\$\w+))?(?:\s+(.+))?$/', $value, $matches)) {
-                    return [
-                        'type' => $matches[1],
-                        'name' => $matches[2] ?? null,
-                        'description' => $matches[3] ?? null,
-                    ];
-                }
-                break;
+    /**
+     * Parse @param or @phpstan-param annotation.
+     *
+     * @param string $value Annotation value
+     * @return array<string, mixed>
+     */
+    private function parseParamAnnotation(string $value): array
+    {
+        // @param Type $name Description
+        if (preg_match('/^([^\s$]+)\s+(\$\w+)(?:\s+(.+))?$/', $value, $matches)) {
+            return [
+                'type' => $matches[1],
+                'name' => $matches[2],
+                'description' => $matches[3] ?? null,
+            ];
+        }
 
-            case 'return':
-            case 'phpstan-return':
-                // @return Type Description
-                if (preg_match('/^([^\s]+)(?:\s+(.+))?$/', $value, $matches)) {
-                    return [
-                        'type' => $matches[1],
-                        'description' => $matches[2] ?? null,
-                    ];
-                }
-                break;
+        return ['raw' => $value];
+    }
 
-            case 'throws':
-                // @throws ExceptionType Description
-                if (preg_match('/^([^\s]+)(?:\s+(.+))?$/', $value, $matches)) {
-                    return [
-                        'exception' => $matches[1],
-                        'description' => $matches[2] ?? null,
-                    ];
-                }
-                break;
+    /**
+     * Parse @var annotation.
+     *
+     * @param string $value Annotation value
+     * @return array<string, mixed>
+     */
+    private function parseVarAnnotation(string $value): array
+    {
+        // @var Type $name or @var Type
+        if (preg_match('/^([^\s$]+)(?:\s+(\$\w+))?(?:\s+(.+))?$/', $value, $matches)) {
+            return [
+                'type' => $matches[1],
+                'name' => $matches[2] ?? null,
+                'description' => $matches[3] ?? null,
+            ];
+        }
 
-            case 'property':
-            case 'property-read':
-            case 'property-write':
-                // @property Type $name Description
-                if (preg_match('/^([^\s$]+)\s+(\$\w+)(?:\s+(.+))?$/', $value, $matches)) {
-                    return [
-                        'type' => $matches[1],
-                        'name' => $matches[2],
-                        'description' => $matches[3] ?? null,
-                    ];
-                }
-                break;
+        return ['raw' => $value];
+    }
 
-            case 'method':
-                // @method ReturnType methodName(Type $param) Description
-                if (preg_match('/^(?:(static)\s+)?([^\s(]+)\s+(\w+)\s*\(([^)]*)\)(?:\s+(.+))?$/', $value, $matches)) {
-                    return [
-                        'static' => $matches[1] === 'static',
-                        'returnType' => $matches[2],
-                        'name' => $matches[3],
-                        'parameters' => $matches[4],
-                        'description' => $matches[5] ?? null,
-                    ];
-                }
-                break;
+    /**
+     * Parse @return or @phpstan-return annotation.
+     *
+     * @param string $value Annotation value
+     * @return array<string, mixed>
+     */
+    private function parseReturnAnnotation(string $value): array
+    {
+        // @return Type Description
+        if (preg_match('/^([^\s]+)(?:\s+(.+))?$/', $value, $matches)) {
+            return [
+                'type' => $matches[1],
+                'description' => $matches[2] ?? null,
+            ];
+        }
 
-            case 'mixin':
-                // @mixin ClassName
-                if (preg_match('/^([\\\\\w]+)(?:\s+(.+))?$/', $value, $matches)) {
-                    return [
-                        'className' => $matches[1],
-                        'description' => $matches[2] ?? null,
-                    ];
-                }
-                break;
+        return ['raw' => $value];
+    }
 
-            case 'phpstan-impure':
-            case 'phpstan-pure':
-                return ['flag' => true];
+    /**
+     * Parse @throws annotation.
+     *
+     * @param string $value Annotation value
+     * @return array<string, mixed>
+     */
+    private function parseThrowsAnnotation(string $value): array
+    {
+        // @throws ExceptionType Description
+        if (preg_match('/^([^\s]+)(?:\s+(.+))?$/', $value, $matches)) {
+            return [
+                'exception' => $matches[1],
+                'description' => $matches[2] ?? null,
+            ];
+        }
 
-            case 'phpstan-require-extends':
-                // @phpstan-require-extends ClassName
-                if (preg_match('/^([\\\\\w]+)(?:\s+(.+))?$/', $value, $matches)) {
-                    return [
-                        'className' => $matches[1],
-                        'description' => $matches[2] ?? null,
-                    ];
-                }
-                break;
+        return ['raw' => $value];
+    }
 
-            case 'phpstan-require-implements':
-                // @phpstan-require-implements InterfaceName
-                if (preg_match('/^([\\\\\w]+)(?:\s+(.+))?$/', $value, $matches)) {
-                    return [
-                        'className' => $matches[1],
-                        'description' => $matches[2] ?? null,
-                    ];
-                }
-                break;
+    /**
+     * Parse @property, @property-read, or @property-write annotation.
+     *
+     * @param string $value Annotation value
+     * @return array<string, mixed>
+     */
+    private function parsePropertyAnnotation(string $value): array
+    {
+        // @property Type $name Description
+        if (preg_match('/^([^\s$]+)\s+(\$\w+)(?:\s+(.+))?$/', $value, $matches)) {
+            return [
+                'type' => $matches[1],
+                'name' => $matches[2],
+                'description' => $matches[3] ?? null,
+            ];
+        }
 
-            case 'phpstan-sealed':
-                // @phpstan-sealed Class1|Class2
-                if (preg_match('/^([\\\\\w|]+)(?:\s+(.+))?$/', $value, $matches)) {
-                    return [
-                        'classList' => $matches[1],
-                        'description' => $matches[2] ?? null,
-                    ];
-                }
-                break;
+        return ['raw' => $value];
+    }
+
+    /**
+     * Parse @method annotation.
+     *
+     * @param string $value Annotation value
+     * @return array<string, mixed>
+     */
+    private function parseMethodAnnotation(string $value): array
+    {
+        // @method ReturnType methodName(Type $param) Description
+        if (preg_match('/^(?:(static)\s+)?([^\s(]+)\s+(\w+)\s*\(([^)]*)\)(?:\s+(.+))?$/', $value, $matches)) {
+            return [
+                'static' => $matches[1] === 'static',
+                'returnType' => $matches[2],
+                'name' => $matches[3],
+                'parameters' => $matches[4],
+                'description' => $matches[5] ?? null,
+            ];
+        }
+
+        return ['raw' => $value];
+    }
+
+    /**
+     * Parse @mixin annotation.
+     *
+     * @param string $value Annotation value
+     * @return array<string, mixed>
+     */
+    private function parseMixinAnnotation(string $value): array
+    {
+        // @mixin ClassName
+        if (preg_match('/^([\\\\\w]+)(?:\s+(.+))?$/', $value, $matches)) {
+            return [
+                'className' => $matches[1],
+                'description' => $matches[2] ?? null,
+            ];
+        }
+
+        return ['raw' => $value];
+    }
+
+    /**
+     * Parse annotation with class name (e.g., @phpstan-require-extends, @phpstan-require-implements).
+     *
+     * @param string $value Annotation value
+     * @param string $key Key name for class name in result array
+     * @return array<string, mixed>
+     */
+    private function parseClassNameAnnotation(string $value, string $key): array
+    {
+        // @phpstan-require-extends ClassName or @phpstan-require-implements InterfaceName
+        if (preg_match('/^([\\\\\w]+)(?:\s+(.+))?$/', $value, $matches)) {
+            return [
+                $key => $matches[1],
+                'description' => $matches[2] ?? null,
+            ];
+        }
+
+        return ['raw' => $value];
+    }
+
+    /**
+     * Parse @phpstan-sealed annotation.
+     *
+     * @param string $value Annotation value
+     * @return array<string, mixed>
+     */
+    private function parseSealedAnnotation(string $value): array
+    {
+        // @phpstan-sealed Class1|Class2
+        if (preg_match('/^([\\\\\w|]+)(?:\s+(.+))?$/', $value, $matches)) {
+            return [
+                'classList' => $matches[1],
+                'description' => $matches[2] ?? null,
+            ];
         }
 
         return ['raw' => $value];
@@ -445,69 +520,111 @@ final class DocblockManipulator
      */
     private function reconstructAnnotation(string $type, array $data): string
     {
-        switch ($type) {
-            case 'param':
-            case 'phpstan-param':
-                $result = ($data['type'] ?? 'mixed') . ' ' . ($data['name'] ?? '');
-                if (isset($data['description'])) {
-                    $result .= ' ' . $data['description'];
-                }
-                return $result;
+        return match ($type) {
+            'param', 'phpstan-param' => $this->reconstructParamAnnotation($data),
+            'return', 'phpstan-return' => $this->reconstructReturnAnnotation($data),
+            'var' => $this->reconstructVarAnnotation($data),
+            'property', 'property-read', 'property-write' => $this->reconstructPropertyAnnotation($data),
+            'phpstan-impure', 'phpstan-pure' => '',
+            'phpstan-require-extends' => $this->reconstructClassNameAnnotation($data, 'className'),
+            'phpstan-require-implements' => $this->reconstructClassNameAnnotation($data, 'className'),
+            'phpstan-sealed' => $this->reconstructSealedAnnotation($data),
+            default => $data['raw'] ?? '',
+        };
+    }
 
-            case 'return':
-            case 'phpstan-return':
-                $result = $data['type'] ?? 'mixed';
-                if (isset($data['description'])) {
-                    $result .= ' ' . $data['description'];
-                }
-                return $result;
-
-            case 'var':
-                $result = $data['type'] ?? 'mixed';
-                if (isset($data['name'])) {
-                    $result .= ' ' . $data['name'];
-                }
-                if (isset($data['description'])) {
-                    $result .= ' ' . $data['description'];
-                }
-                return $result;
-
-            case 'property':
-            case 'property-read':
-            case 'property-write':
-                $result = ($data['type'] ?? 'mixed') . ' ' . ($data['name'] ?? '');
-                if (isset($data['description'])) {
-                    $result .= ' ' . $data['description'];
-                }
-                return $result;
-
-            case 'phpstan-impure':
-            case 'phpstan-pure':
-                return '';
-
-            case 'phpstan-require-extends':
-                $result = $data['className'] ?? '';
-                if (isset($data['description'])) {
-                    $result .= ' ' . $data['description'];
-                }
-                return trim($result);
-
-            case 'phpstan-require-implements':
-                $result = $data['className'] ?? '';
-                if (isset($data['description'])) {
-                    $result .= ' ' . $data['description'];
-                }
-                return trim($result);
-
-            case 'phpstan-sealed':
-                $result = $data['classList'] ?? '';
-                if (isset($data['description'])) {
-                    $result .= ' ' . $data['description'];
-                }
-                return trim($result);
+    /**
+     * Reconstruct @param or @phpstan-param annotation string.
+     *
+     * @param array<string, mixed> $data Parsed annotation data
+     * @return string
+     */
+    private function reconstructParamAnnotation(array $data): string
+    {
+        $result = ($data['type'] ?? 'mixed') . ' ' . ($data['name'] ?? '');
+        if (isset($data['description'])) {
+            $result .= ' ' . $data['description'];
         }
+        return $result;
+    }
 
-        return $data['raw'] ?? '';
+    /**
+     * Reconstruct @return or @phpstan-return annotation string.
+     *
+     * @param array<string, mixed> $data Parsed annotation data
+     * @return string
+     */
+    private function reconstructReturnAnnotation(array $data): string
+    {
+        $result = $data['type'] ?? 'mixed';
+        if (isset($data['description'])) {
+            $result .= ' ' . $data['description'];
+        }
+        return $result;
+    }
+
+    /**
+     * Reconstruct @var annotation string.
+     *
+     * @param array<string, mixed> $data Parsed annotation data
+     * @return string
+     */
+    private function reconstructVarAnnotation(array $data): string
+    {
+        $result = $data['type'] ?? 'mixed';
+        if (isset($data['name'])) {
+            $result .= ' ' . $data['name'];
+        }
+        if (isset($data['description'])) {
+            $result .= ' ' . $data['description'];
+        }
+        return $result;
+    }
+
+    /**
+     * Reconstruct @property, @property-read, or @property-write annotation string.
+     *
+     * @param array<string, mixed> $data Parsed annotation data
+     * @return string
+     */
+    private function reconstructPropertyAnnotation(array $data): string
+    {
+        $result = ($data['type'] ?? 'mixed') . ' ' . ($data['name'] ?? '');
+        if (isset($data['description'])) {
+            $result .= ' ' . $data['description'];
+        }
+        return $result;
+    }
+
+    /**
+     * Reconstruct class name annotation string (e.g., @phpstan-require-extends, @phpstan-require-implements).
+     *
+     * @param array<string, mixed> $data Parsed annotation data
+     * @param string $key Key name for class name in data array
+     * @return string
+     */
+    private function reconstructClassNameAnnotation(array $data, string $key): string
+    {
+        $result = $data[$key] ?? '';
+        if (isset($data['description'])) {
+            $result .= ' ' . $data['description'];
+        }
+        return trim($result);
+    }
+
+    /**
+     * Reconstruct @phpstan-sealed annotation string.
+     *
+     * @param array<string, mixed> $data Parsed annotation data
+     * @return string
+     */
+    private function reconstructSealedAnnotation(array $data): string
+    {
+        $result = $data['classList'] ?? '';
+        if (isset($data['description'])) {
+            $result .= ' ' . $data['description'];
+        }
+        return trim($result);
     }
 }
 
