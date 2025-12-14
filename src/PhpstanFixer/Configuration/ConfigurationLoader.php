@@ -212,6 +212,15 @@ final class ConfigurationLoader
             $excludePaths = $this->extractStringArray($data['exclude_paths'], 'exclude_paths');
         }
 
+        // Parse custom_fixers
+        $customFixers = [];
+        if (isset($data['custom_fixers'])) {
+            if (!is_array($data['custom_fixers'])) {
+                throw new \RuntimeException('Configuration "custom_fixers" must be an array.');
+            }
+            $customFixers = $this->extractStringArray($data['custom_fixers'], 'custom_fixers');
+        }
+
         return new Configuration(
             $rules,
             $this->createRule('default', $defaultAction),
@@ -219,7 +228,8 @@ final class ConfigurationLoader
             $disabledFixers,
             $fixerPriorities,
             $includePaths,
-            $excludePaths
+            $excludePaths,
+            $customFixers
         );
     }
 

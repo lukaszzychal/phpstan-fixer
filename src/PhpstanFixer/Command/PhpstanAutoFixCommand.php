@@ -115,7 +115,12 @@ final class PhpstanAutoFixCommand extends Command
         // Load configuration if specified or found
         $configuration = $this->loadConfiguration($input->getOption('config'), $io);
         
-        $autoFixService = $this->autoFixService ?? $this->createDefaultAutoFixService($configuration);
+        try {
+            $autoFixService = $this->autoFixService ?? $this->createDefaultAutoFixService($configuration);
+        } catch (\RuntimeException $e) {
+            $io->error($e->getMessage());
+            return Command::FAILURE;
+        }
 
         $inputPath = $input->getOption('input');
         $mode = $input->getOption('mode');
@@ -393,6 +398,12 @@ final class PhpstanAutoFixCommand extends Command
             new MagicPropertyFixer($analyzer, $docblockManipulator),
         ];
 
+        // Load custom fixers from configuration
+        $customStrategies = $this->loadCustomFixers($configuration);
+
+        // Merge built-in and custom strategies
+        $allStrategies = array_merge($allStrategies, $customStrategies);
+
         // Filter strategies based on configuration
         $strategies = $this->filterStrategies($allStrategies, $configuration);
 
@@ -400,6 +411,86 @@ final class PhpstanAutoFixCommand extends Command
         $strategies = $this->applyFixerPriorities($strategies, $configuration);
 
         return new AutoFixService($strategies, $configuration);
+    }
+
+    /**
+     * Load custom fixer strategies from configuration.
+     *
+     * @param Configuration|null $configuration Configuration object
+     * @return array<FixStrategyInterface> Loaded custom fixers
+     * @throws \RuntimeException If custom fixer class cannot be loaded or doesn't implement FixStrategyInterface
+     */
+    private function loadCustomFixers(?Configuration $configuration): array
+    {
+        if ($configuration === null) {
+            return [];
+        }
+
+        $customFixers = $configuration->getCustomFixers();
+        if (empty($customFixers)) {
+            return [];
+        }
+
+        $strategies = [];
+        $analyzer = new PhpFileAnalyzer();
+        $docblockManipulator = new DocblockManipulator();
+
+        foreach ($customFixers as $fixerClass) {
+            if (!class_exists($fixerClass)) {
+                throw new \RuntimeException(
+                    "Custom fixer class not found: {$fixerClass}. Make sure the class is autoloaded."
+                );
+            }
+
+            if (!is_subclass_of($fixerClass, FixStrategyInterface::class)) {
+                throw new \RuntimeException(
+                    "Custom fixer class {$fixerClass} must implement " . FixStrategyInterface::class
+                );
+            }
+
+            // Try to instantiate with common dependencies
+            try {
+                // Try with analyzer and docblock manipulator (most common)
+                $reflection = new \ReflectionClass($fixerClass);
+                $constructor = $reflection->getConstructor();
+
+                if ($constructor === null) {
+                    $strategy = new $fixerClass();
+                } else {
+                    $params = $constructor->getParameters();
+                    $args = [];
+
+                    foreach ($params as $param) {
+                        $type = $param->getType();
+                        if ($type instanceof \ReflectionNamedType) {
+                            $typeName = $type->getName();
+                            if ($typeName === PhpFileAnalyzer::class || $typeName === 'PhpstanFixer\CodeAnalysis\PhpFileAnalyzer') {
+                                $args[] = $analyzer;
+                            } elseif ($typeName === DocblockManipulator::class || $typeName === 'PhpstanFixer\CodeAnalysis\DocblockManipulator') {
+                                $args[] = $docblockManipulator;
+                            } else {
+                                // For other types, try to instantiate or use null
+                                $args[] = null;
+                            }
+                        } else {
+                            $args[] = null;
+                        }
+                    }
+
+                    $strategy = new $fixerClass(...$args);
+                }
+
+                $strategies[] = $strategy;
+            } catch (\Throwable $e) {
+                throw new \RuntimeException(
+                    "Failed to instantiate custom fixer {$fixerClass}: " . $e->getMessage(),
+                    0,
+                    $e
+                );
+            }
+        }
+
+        return $strategies;
     }
 
     /**
