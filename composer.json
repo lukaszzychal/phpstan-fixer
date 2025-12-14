@@ -61,7 +61,7 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": true
+            "dont-discover": []
         }
     },
     "minimum-stability": "stable",
