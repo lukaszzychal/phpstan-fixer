@@ -106,36 +106,24 @@ Przed commitem sprawdź:
 
 ### Weryfikacja spójności struktury
 
-Możesz użyć prostego skryptu do sprawdzenia spójności nagłówków między wersjami językowymi.
+Możesz użyć skryptu do sprawdzenia spójności nagłówków między wersjami językowymi:
 
-**Przykładowy skrypt** (bash):
 ```bash
-#!/bin/bash
-# verify_doc_structure.sh
-# Porównuje strukturę nagłówków między wersjami EN i PL
+./scripts/verify_doc_structure.sh docs/DOCUMENT_NAME.md
+```
 
-EN_FILE="$1"
-PL_FILE="${EN_FILE%.md}_PL.md"
+Skrypt porównuje:
+- Liczbę nagłówków (H1-H6) w obu wersjach
+- Strukturę poziomów nagłówków
+- Sprawdza, czy istnieje polska wersja dokumentu
 
-if [ ! -f "$PL_FILE" ]; then
-    echo "⚠️  Brak polskiej wersji dla: $EN_FILE"
-    exit 1
-fi
+**Przykład użycia**:
+```bash
+# Sprawdź spójność README.md
+./scripts/verify_doc_structure.sh README.md
 
-# Wyciągnij nagłówki z obu plików
-EN_HEADERS=$(grep -E '^#{1,6}\s+' "$EN_FILE" | sed 's/#/ /g' | sed 's/^ *//')
-PL_HEADERS=$(grep -E '^#{1,6}\s+' "$PL_FILE" | sed 's/#/ /g' | sed 's/^ *//')
-
-# Porównaj liczbę nagłówków
-EN_COUNT=$(echo "$EN_HEADERS" | wc -l)
-PL_COUNT=$(echo "$PL_HEADERS" | wc -l)
-
-if [ "$EN_COUNT" -ne "$PL_COUNT" ]; then
-    echo "❌ Liczba nagłówków się nie zgadza: EN=$EN_COUNT, PL=$PL_COUNT"
-    exit 1
-fi
-
-echo "✅ Struktura dokumentów jest spójna"
+# Sprawdź dokumentację techniczną
+./scripts/verify_doc_structure.sh docs/FRAMEWORK_DETECTION.md
 ```
 
 ## Lista Dokumentów Do Weryfikacji
