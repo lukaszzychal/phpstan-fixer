@@ -12,7 +12,7 @@ PHPStan Fixer automatically detects PHP frameworks and filters framework-specifi
 
 ### Laravel
 - Detected from: `composer.json` (`laravel/framework`) or directory structure (`artisan`, `app/`, `config/`, `routes/`)
-- Framework-specific fixers: `UndefinedPivotPropertyFixer`
+- Framework-specific fixers: `UndefinedPivotPropertyFixer`, `CollectionGenericDocblockFixer`
 
 ### Symfony
 - Detected from: `composer.json` (`symfony/symfony` or multiple `symfony/*` components) or directory structure (`symfony.lock`, `src/`, `config/`, `public/`)

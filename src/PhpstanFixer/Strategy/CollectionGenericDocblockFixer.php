@@ -19,6 +19,7 @@ use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Fixes missing generic type parameters in Collection types.
+ * This is specifically for Laravel's Illuminate\Support\Collection class.
  *
  * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
@@ -137,6 +138,11 @@ final class CollectionGenericDocblockFixer implements FixStrategyInterface
     public function getName(): string
     {
         return 'CollectionGenericDocblockFixer';
+    }
+
+    public function getSupportedFrameworks(): array
+    {
+        return ['laravel'];
     }
 }
 
