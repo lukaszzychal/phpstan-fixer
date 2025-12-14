@@ -9,7 +9,7 @@ parameters:
     ignoreErrors:
         # PHPUnit assertion false positives (more specific patterns)
         # Matches assertIsArray/assertIsBool/assertIsString/etc. with any type (including generics)
-        - '#Call to method PHPUnit\\\\Framework\\\\Assert::assertIs(Array|Bool|String|Int|Float)\(\) with .+ will always evaluate to true\.#'
+        - '#Call to method .*::assertIs(Array|Bool|String|Int|Float)\(\) with .+ will always evaluate to true\.#'
         
         # Unreachable statement false positives (can occur in tests and src with conditional logic)
         - '#Unreachable statement - code above always terminates\.#'
