@@ -13,6 +13,7 @@ namespace PhpstanFixer\Strategy;
 
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
+use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Adjusts PHPDoc to use fully-qualified names when class names conflict with internal types.
@@ -21,6 +22,8 @@ use PhpstanFixer\Issue;
  */
 final class ClassesNamedAfterInternalTypesFixer implements FixStrategyInterface
 {
+    use PriorityTrait;
+    
     /** @var string[] */
     private array $internalTypes = ['Resource', 'Double', 'Number'];
 

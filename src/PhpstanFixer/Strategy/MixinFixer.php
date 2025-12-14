@@ -22,6 +22,7 @@ use PhpParser\Node\Expr\PropertyFetch;
 use PhpParser\Node\Expr\StaticPropertyFetch;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\NodeFinder;
+use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Fixes undefined method/property errors by adding @mixin annotation when class uses magic methods.
@@ -30,6 +31,7 @@ use PhpParser\NodeFinder;
  */
 final class MixinFixer implements FixStrategyInterface
 {
+    use PriorityTrait;
     private NodeFinder $nodeFinder;
 
     public function __construct(
