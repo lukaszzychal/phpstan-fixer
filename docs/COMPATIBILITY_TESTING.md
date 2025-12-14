@@ -1,5 +1,7 @@
 # Compatibility Testing
 
+> 🇵🇱 **Polish version**: [Testy Kompatybilności (PL)](COMPATIBILITY_TESTING_PL.md)
+
 This document explains how to set up and use compatibility testing for your PHP package using `php-compatibility-tester`.
 
 ## Overview

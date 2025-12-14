@@ -1,5 +1,7 @@
 # Framework Detection
 
+> 🇵🇱 **Polish version**: [Wykrywanie Frameworków (PL)](FRAMEWORK_DETECTION_PL.md)
+
 PHPStan Fixer automatically detects PHP frameworks and filters framework-specific fixers accordingly.
 
 ## How It Works
