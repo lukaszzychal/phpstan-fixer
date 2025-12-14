@@ -46,6 +46,7 @@ use PhpstanFixer\Strategy\PriorityWrapper;
 use PhpstanFixer\Strategy\UndefinedPivotPropertyFixer;
 use PhpstanFixer\Strategy\UndefinedVariableFixer;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -166,8 +167,35 @@ final class PhpstanAutoFixCommand extends Command
             $io->note("Strategy filter '{$strategyFilter}' is not yet fully implemented");
         }
 
-        // Fix issues
-        $results = $autoFixService->fixAllIssues($issues);
+        // Group issues by file to get total file count for progress
+        $groupedIssues = $autoFixService->groupIssuesByFile($issues);
+        $totalFiles = count($groupedIssues);
+
+        // Create progress bar if there are multiple files (always show for better UX)
+        $progressBar = null;
+        if ($totalFiles > 1) {
+            $progressBar = new ProgressBar($output, $totalFiles);
+            $progressBar->setFormat(' %current%/%max% [%bar%] %percent:3s%% %elapsed:6s%/%estimated:-6s% %message%');
+            $progressBar->setMessage('Processing files...');
+            $progressBar->start();
+        }
+
+        // Fix issues with progress callback
+        $results = $autoFixService->fixAllIssues(
+            $issues,
+            function (int $processed, int $total, string $currentFile) use ($progressBar): void {
+                if ($progressBar !== null) {
+                    $relativePath = basename($currentFile);
+                    $progressBar->setMessage("Processing: {$relativePath}");
+                    $progressBar->advance();
+                }
+            }
+        );
+
+        if ($progressBar !== null) {
+            $progressBar->finish();
+            $io->newLine(2);
+        }
         $stats = $autoFixService->getStatistics($results);
 
         // Display results
