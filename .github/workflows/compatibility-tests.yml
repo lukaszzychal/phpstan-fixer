@@ -1,15 +1,19 @@
 name: Compatibility Tests
 
 on:
+  # Run on push to main/develop branches
+  push:
+    branches: [ main, develop ]
+    tags:
+      - 'v*'
+  # Run on pull requests to main/develop
+  pull_request:
+    branches: [ main, develop ]
   # Run monthly on the 1st day at 2 AM UTC
   schedule:
     - cron: '0 2 1 * *'  # Monthly on 1st day at 2 AM UTC
   # Manual trigger (workflow_dispatch)
   workflow_dispatch:
-  # Optional: Run on release tags (uncomment if needed)
-  # push:
-  #   tags:
-  #     - 'v*'
 
 jobs:
   compatibility-tests:
