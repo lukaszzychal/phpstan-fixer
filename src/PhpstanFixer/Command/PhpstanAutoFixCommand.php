@@ -617,7 +617,9 @@ final class PhpstanAutoFixCommand extends Command
      */
     private function collectChangeIndices(array $operations, array $originalLines, array $fixedLines): array
     {
+        /** @var array<int> $changeOldIndices */
         $changeOldIndices = [];
+        /** @var array<int> $changeNewIndices */
         $changeNewIndices = [];
         
         foreach ($operations as $op) {
@@ -676,6 +678,8 @@ final class PhpstanAutoFixCommand extends Command
 
     /**
      * Add old index if valid, or use last valid index for insertions at end.
+     *
+     * @param array<int> $changeOldIndices
      */
     private function addOldIndexForInsertion(int $oldIndex, array $originalLines, array &$changeOldIndices): void
     {
@@ -689,6 +693,8 @@ final class PhpstanAutoFixCommand extends Command
 
     /**
      * Add new index if valid, or use last valid index for removals at end.
+     *
+     * @param array<int> $changeNewIndices
      */
     private function addNewIndexForRemoval(int $newIndex, array $fixedLines, array &$changeNewIndices): void
     {
@@ -702,6 +708,8 @@ final class PhpstanAutoFixCommand extends Command
 
     /**
      * Add old index only if it's within bounds.
+     *
+     * @param array<int> $changeOldIndices
      */
     private function addOldIndexIfValid(int $oldIndex, array $originalLines, array &$changeOldIndices): void
     {
@@ -712,6 +720,8 @@ final class PhpstanAutoFixCommand extends Command
 
     /**
      * Add new index only if it's within bounds.
+     *
+     * @param array<int> $changeNewIndices
      */
     private function addNewIndexIfValid(int $newIndex, array $fixedLines, array &$changeNewIndices): void
     {
