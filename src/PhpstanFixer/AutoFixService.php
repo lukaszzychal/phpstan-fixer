@@ -188,73 +188,23 @@ final class AutoFixService
     public function fixAllIssues(array $issues, ?callable $progressCallback = null): array
     {
         $groupedIssues = $this->groupIssuesByFile($issues);
-        $results = [];
-        
-        // Filter to only processable files and count them for accurate progress reporting
-        // This ensures progress callback reports correct totals even when files are skipped
-        $processableFiles = [];
-        foreach ($groupedIssues as $filePath => $fileIssues) {
-            if (file_exists($filePath)) {
-                $processableFiles[$filePath] = $fileIssues;
-            }
-        }
+        $processableFiles = $this->filterProcessableFiles($groupedIssues);
         
         $totalFiles = count($processableFiles);
         $processedFiles = 0;
+        $results = [];
 
         foreach ($processableFiles as $filePath => $fileIssues) {
-            $fileContent = file_get_contents($filePath);
-            if ($fileContent === false) {
+            $fileContent = $this->readFileContent($filePath);
+            if ($fileContent === null) {
                 // Skip files that can't be read (even though they exist)
                 // This shouldn't happen often, but handle it gracefully
                 $totalFiles--;
                 continue;
             }
 
-            $fixResults = $this->fixIssues($fileIssues, $fileContent);
-
-            // Determine the final fixed content
-            $finalContent = $fileContent;
-            $hasChanges = false;
-
-            foreach ($fixResults as $result) {
-                if ($result->isSuccessful()) {
-                    $finalContent = $result->getFixedContent();
-                    $hasChanges = true;
-                }
-            }
-
-            // Get unfixed, reported, and ignored issues
-            // Note: Use $result->getIssue() instead of $fileIssues[$index] because
-            // fixIssues() sorts issues by line number (descending), which reorders them.
-            // Using array indices would map to wrong issues.
-            $unfixedIssues = [];
-            $reportedIssues = [];
-            $ignoredIssues = [];
-            foreach ($fixResults as $result) {
-                if ($result->isIgnored()) {
-                    // Ignored issues (tracked but not displayed)
-                    $ignoredIssues[] = $result->getIssue();
-                } elseif ($result->isReported()) {
-                    // Reported issues should be shown in output
-                    $reportedIssues[] = $result->getIssue();
-                } elseif (!$result->isSuccessful()) {
-                    // Unfixed issues (not ignored, not reported)
-                    $unfixedIssues[] = $result->getIssue();
-                }
-            }
-
-            $results[$filePath] = [
-                'issues' => $fileIssues,
-                'results' => $fixResults,
-                'originalContent' => $fileContent,
-                'fixedContent' => $finalContent,
-                'hasChanges' => $hasChanges,
-                'fixCount' => count(array_filter($fixResults, fn($r) => $r->isSuccessful())),
-                'unfixedIssues' => $unfixedIssues,
-                'reportedIssues' => $reportedIssues,
-                'ignoredIssues' => $ignoredIssues,
-            ];
+            $fileResult = $this->processFile($filePath, $fileIssues, $fileContent);
+            $results[$filePath] = $fileResult;
 
             // Call progress callback if provided
             $processedFiles++;
@@ -264,6 +214,110 @@ final class AutoFixService
         }
 
         return $results;
+    }
+
+    /**
+     * Filter grouped issues to only include files that exist.
+     *
+     * @param array<string, Issue[]> $groupedIssues Issues grouped by file path
+     * @return array<string, Issue[]> Only files that exist
+     */
+    private function filterProcessableFiles(array $groupedIssues): array
+    {
+        $processableFiles = [];
+        foreach ($groupedIssues as $filePath => $fileIssues) {
+            if (file_exists($filePath)) {
+                $processableFiles[$filePath] = $fileIssues;
+            }
+        }
+        return $processableFiles;
+    }
+
+    /**
+     * Read file content, returning null if file cannot be read.
+     *
+     * @param string $filePath Path to file
+     * @return string|null File content or null if cannot be read
+     */
+    private function readFileContent(string $filePath): ?string
+    {
+        $content = file_get_contents($filePath);
+        return $content === false ? null : $content;
+    }
+
+    /**
+     * Process a single file: fix issues and build result array.
+     *
+     * @param string $filePath Path to the file
+     * @param Issue[] $fileIssues Issues for this file
+     * @param string $fileContent Original file content
+     * @return array<string, mixed> Result array with fixes, issues, etc.
+     */
+    private function processFile(string $filePath, array $fileIssues, string $fileContent): array
+    {
+        $fixResults = $this->fixIssues($fileIssues, $fileContent);
+
+        // Determine the final fixed content
+        $finalContent = $this->determineFinalContent($fixResults, $fileContent);
+        $hasChanges = $finalContent !== $fileContent;
+
+        // Categorize issues by status
+        [$unfixedIssues, $reportedIssues, $ignoredIssues] = $this->categorizeIssues($fixResults);
+
+        return [
+            'issues' => $fileIssues,
+            'results' => $fixResults,
+            'originalContent' => $fileContent,
+            'fixedContent' => $finalContent,
+            'hasChanges' => $hasChanges,
+            'fixCount' => count(array_filter($fixResults, fn($r) => $r->isSuccessful())),
+            'unfixedIssues' => $unfixedIssues,
+            'reportedIssues' => $reportedIssues,
+            'ignoredIssues' => $ignoredIssues,
+        ];
+    }
+
+    /**
+     * Determine final content after applying fixes.
+     *
+     * @param FixResult[] $fixResults Results from fixing issues
+     * @param string $originalContent Original file content
+     * @return string Final content after applying all fixes
+     */
+    private function determineFinalContent(array $fixResults, string $originalContent): string
+    {
+        $finalContent = $originalContent;
+        foreach ($fixResults as $result) {
+            if ($result->isSuccessful()) {
+                $finalContent = $result->getFixedContent();
+            }
+        }
+        return $finalContent;
+    }
+
+    /**
+     * Categorize fix results into unfixed, reported, and ignored issues.
+     *
+     * @param FixResult[] $fixResults Results from fixing issues
+     * @return array{0: Issue[], 1: Issue[], 2: Issue[]} [unfixed, reported, ignored]
+     */
+    private function categorizeIssues(array $fixResults): array
+    {
+        $unfixedIssues = [];
+        $reportedIssues = [];
+        $ignoredIssues = [];
+
+        foreach ($fixResults as $result) {
+            if ($result->isIgnored()) {
+                $ignoredIssues[] = $result->getIssue();
+            } elseif ($result->isReported()) {
+                $reportedIssues[] = $result->getIssue();
+            } elseif (!$result->isSuccessful()) {
+                $unfixedIssues[] = $result->getIssue();
+            }
+        }
+
+        return [$unfixedIssues, $reportedIssues, $ignoredIssues];
     }
 
     /**

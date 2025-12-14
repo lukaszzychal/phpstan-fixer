@@ -203,24 +203,37 @@ final class PhpstanAutoFixCommand extends Command
 
         // Apply changes if in apply mode
         if ($mode === 'apply') {
-            $appliedCount = 0;
-            foreach ($results as $filePath => $fileResults) {
-                if ($fileResults['hasChanges']) {
-                    if (file_put_contents($filePath, $fileResults['fixedContent']) !== false) {
-                        $appliedCount++;
-                        $io->writeln("✓ Fixed: {$filePath}");
-                    } else {
-                        $io->error("Failed to write: {$filePath}");
-                    }
-                }
-            }
-
-            if ($appliedCount > 0) {
-                $io->success(sprintf('Applied fixes to %d file(s)', $appliedCount));
-            }
+            $this->applyFixes($results, $io);
         }
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Apply fixes to files on disk.
+     *
+     * @param array<string, array<string, mixed>> $results Results from fixAllIssues
+     * @param SymfonyStyle $io I/O helper
+     */
+    private function applyFixes(array $results, SymfonyStyle $io): void
+    {
+        $appliedCount = 0;
+        foreach ($results as $filePath => $fileResults) {
+            if (!$fileResults['hasChanges']) {
+                continue;
+            }
+
+            if (file_put_contents($filePath, $fileResults['fixedContent']) !== false) {
+                $appliedCount++;
+                $io->writeln("✓ Fixed: {$filePath}");
+            } else {
+                $io->error("Failed to write: {$filePath}");
+            }
+        }
+
+        if ($appliedCount > 0) {
+            $io->success(sprintf('Applied fixes to %d file(s)', $appliedCount));
+        }
     }
 
     /**
@@ -407,10 +420,38 @@ final class PhpstanAutoFixCommand extends Command
      */
     private function createDefaultAutoFixService(?Configuration $configuration = null, ?string $framework = null): AutoFixService
     {
+        // Create built-in strategies
+        $allStrategies = $this->createBuiltInStrategies();
+
+        // Load custom fixers from configuration
+        $customStrategies = $this->loadCustomFixers($configuration);
+
+        // Merge built-in and custom strategies
+        $allStrategies = array_merge($allStrategies, $customStrategies);
+
+        // Filter strategies based on configuration
+        $strategies = $this->filterStrategies($allStrategies, $configuration);
+        
+        // Filter framework-specific fixers based on detected framework
+        $strategies = $this->filterFrameworkSpecificFixers($strategies, $framework);
+
+        // Apply priorities from configuration
+        $strategies = $this->applyFixerPriorities($strategies, $configuration);
+
+        return new AutoFixService($strategies, $configuration);
+    }
+
+    /**
+     * Create all built-in fixer strategies.
+     *
+     * @return array<FixStrategyInterface> Built-in strategies
+     */
+    private function createBuiltInStrategies(): array
+    {
         $analyzer = new PhpFileAnalyzer();
         $docblockManipulator = new DocblockManipulator();
 
-        $allStrategies = [
+        return [
             new MissingReturnDocblockFixer($analyzer, $docblockManipulator),
             new MissingParamDocblockFixer($analyzer, $docblockManipulator),
             new MissingPropertyDocblockFixer($analyzer, $docblockManipulator),
@@ -435,23 +476,6 @@ final class PhpstanAutoFixCommand extends Command
             new ClassesNamedAfterInternalTypesFixer(),
             new MagicPropertyFixer($analyzer, $docblockManipulator),
         ];
-
-        // Load custom fixers from configuration
-        $customStrategies = $this->loadCustomFixers($configuration);
-
-        // Merge built-in and custom strategies
-        $allStrategies = array_merge($allStrategies, $customStrategies);
-
-        // Filter strategies based on configuration
-        $strategies = $this->filterStrategies($allStrategies, $configuration);
-        
-        // Filter framework-specific fixers based on detected framework
-        $strategies = $this->filterFrameworkSpecificFixers($strategies, $framework);
-
-        // Apply priorities from configuration
-        $strategies = $this->applyFixerPriorities($strategies, $configuration);
-
-        return new AutoFixService($strategies, $configuration);
     }
 
     /**
