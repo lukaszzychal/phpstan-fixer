@@ -131,8 +131,19 @@ if (preg_match('/Parameter\s+\$(\w+)/i', $message, $matches)) {
 
 ### 3. Kolejność refaktoryzacji
 
-1. Najpierw `TypeFormatterTrait` - najprostszy przypadek
-2. Potem `FileValidationTrait` - często używany
-3. Następnie `FunctionLocatorTrait` - bardziej skomplikowany
-4. Na końcu `ErrorMessageParser` - wymaga więcej analizy wzorców
+1. ✅ `TypeFormatterTrait` - utworzony i zastosowany w 2 fixerach
+2. ✅ `FileValidationTrait` - utworzony i zastosowany w 2 fixerach
+3. ⏳ `FunctionLocatorTrait` - do zrobienia w Fazie 3
+4. ⏳ `ErrorMessageParser` - do zrobienia w Fazie 3
+
+## Status Fazy 2
+
+✅ **Zakończona** - Utworzono 2 traity i zastosowano je w 2 fixerach:
+- `TypeFormatterTrait` - eliminuje duplikację `formatType()`
+- `FileValidationTrait` - eliminuje duplikację walidacji pliku i parsowania AST
+
+**Następne kroki** (Faza 3):
+- Zastosować `FileValidationTrait` do pozostałych ~18 fixerów
+- Utworzyć `FunctionLocatorTrait` dla znajdowania funkcji/metod
+- Utworzyć `ErrorMessageParser` helper class
 

@@ -55,14 +55,16 @@ Faza 2 skupia się na dalszych obszarach wymagających refaktoryzacji i redesign
 
 ## Plan działania (Faza 2)
 
-1. ⏳ Analiza duplikacji w Strategy/*.php
-2. ⏳ Identyfikacja wspólnych wzorców
-3. ⏳ Utworzenie traitów/pomocniczych klas (jeśli potrzebne)
-4. ⏳ Refaktoryzacja `loadCustomFixers()`
-5. ⏳ Dalsza optymalizacja `DocblockManipulator`
-6. ⏳ Sprawdzenie spójności w Configuration/*.php
-7. ⏳ Optymalizacja `PhpstanLogParser`
-8. ⏳ Testy i weryfikacja
+1. ✅ Analiza duplikacji w Strategy/*.php
+2. ✅ Identyfikacja wspólnych wzorców
+3. ✅ Utworzenie traitów pomocniczych:
+   - ✅ `TypeFormatterTrait` - formatowanie typów PHP-Parser
+   - ✅ `FileValidationTrait` - walidacja pliku i parsowanie AST
+4. ⏳ Refaktoryzacja `loadCustomFixers()` - przeniesione do Fazy 3
+5. ⏳ Dalsza optymalizacja `DocblockManipulator` - przeniesione do Fazy 3
+6. ⏳ Sprawdzenie spójności w Configuration/*.php - przeniesione do Fazy 3
+7. ⏳ Optymalizacja `PhpstanLogParser` - przeniesione do Fazy 3
+8. ✅ Testy i weryfikacja - wszystkie testy przechodzą
 
 ## Metodyka
 
