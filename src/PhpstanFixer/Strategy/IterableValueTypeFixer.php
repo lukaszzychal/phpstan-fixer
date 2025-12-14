@@ -16,6 +16,7 @@ use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
+use PhpstanFixer\Strategy\FunctionLocatorTrait;
 
 /**
  * Adds iterable value types (iterable<mixed>) when PHPStan reports missing iterable value type.
@@ -25,6 +26,9 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class IterableValueTypeFixer implements FixStrategyInterface
 {
     use PriorityTrait;
+    use FileValidationTrait;
+    use FunctionLocatorTrait;
+
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator
@@ -51,32 +55,10 @@ final class IterableValueTypeFixer implements FixStrategyInterface
         $targetLine = $issue->getLine();
         $paramName = $this->extractParamName($issue->getMessage());
 
-        $functions = $this->analyzer->getFunctions($ast);
-        $classes = $this->analyzer->getClasses($ast);
-
-        $targetFunction = null;
-        $targetMethod = null;
-
-        foreach ($functions as $function) {
-            $functionLine = $this->analyzer->getNodeLine($function);
-            if ($functionLine === $targetLine || abs($functionLine - $targetLine) <= 5) {
-                $targetFunction = $function;
-                break;
-            }
-        }
-
-        if ($targetFunction === null) {
-            foreach ($classes as $class) {
-                $methods = $this->analyzer->getMethods($class);
-                foreach ($methods as $method) {
-                    $methodLine = $this->analyzer->getNodeLine($method);
-                    if ($methodLine === $targetLine || abs($methodLine - $targetLine) <= 5) {
-                        $targetMethod = $method;
-                        break 2;
-                    }
-                }
-            }
-        }
+        // Find function/method at this line (with tolerance of 5 lines)
+        $located = $this->findFunctionOrMethodAtLine($ast, $targetLine, $this->analyzer, 5);
+        $targetFunction = $located['function'];
+        $targetMethod = $located['method'];
 
         $targetNode = $targetFunction ?? $targetMethod;
         if ($targetNode === null) {
