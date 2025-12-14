@@ -58,7 +58,7 @@ final class FixerFactory
      *
      * @param string $fixerClass Fully qualified class name
      * @return FixStrategyInterface
-     * @throws \RuntimeException If instantiation fails (wraps any Throwable)
+     * @throws \RuntimeException If instantiation fails (wraps ReflectionException and other exceptions)
      */
     private function instantiateFixer(string $fixerClass): FixStrategyInterface
     {
@@ -72,6 +72,12 @@ final class FixerFactory
 
             $args = $this->resolveConstructorArguments($constructor);
             return $reflection->newInstanceArgs($args);
+        } catch (\ReflectionException $e) {
+            throw new \RuntimeException(
+                "Failed to instantiate fixer {$fixerClass}: " . $e->getMessage(),
+                0,
+                $e
+            );
         } catch (\Throwable $e) {
             throw new \RuntimeException(
                 "Failed to instantiate fixer {$fixerClass}: " . $e->getMessage(),
