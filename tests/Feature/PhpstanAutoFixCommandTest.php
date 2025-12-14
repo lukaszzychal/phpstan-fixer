@@ -237,6 +237,58 @@ JSON;
         $this->assertStringContainsString('Failed to parse', $output);
     }
 
+    public function testCommandShowsUnifiedDiffInSuggestMode(): void
+    {
+        $phpFile = <<<'PHP'
+<?php
+
+class Test {
+    public function foo() {
+        return 42;
+    }
+}
+PHP;
+        file_put_contents($this->tempFile, $phpFile);
+
+        $phpstanJson = sprintf(<<<'JSON'
+{
+  "totals": {
+    "errors": 0,
+    "file_errors": 1
+  },
+  "files": {
+    "%s": {
+      "errors": 0,
+      "messages": [
+        {
+          "message": "Method has no return type specified",
+          "line": 4,
+          "ignorable": false
+        }
+      ]
+    }
+  }
+}
+JSON, $this->tempFile);
+
+        $inputFile = $this->tempDir . '/phpstan.json';
+        file_put_contents($inputFile, $phpstanJson);
+
+        $command = $this->createCommand();
+        $commandTester = new CommandTester($command);
+        
+        $commandTester->execute([
+            '--input' => $inputFile,
+            '--mode' => 'suggest',
+        ]);
+
+        $this->assertEquals(0, $commandTester->getStatusCode());
+        $output = $commandTester->getDisplay();
+        $this->assertStringContainsString('--- a/', $output);
+        $this->assertStringContainsString('+++ b/', $output);
+        $this->assertStringContainsString('@@', $output);
+    }
+
     private function createCommand(): PhpstanAutoFixCommand
     {
         $application = new Application();

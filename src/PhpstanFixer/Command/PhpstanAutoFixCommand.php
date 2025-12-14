@@ -243,6 +243,18 @@ final class PhpstanAutoFixCommand extends Command
                 }
 
                 $io->writeln("<info>{$filePath}</info>");
+                
+                // Show unified diff if content changed
+                if ($fileResults['fixedContent'] !== $fileResults['originalContent']) {
+                    $diff = $this->generateUnifiedDiff(
+                        $filePath,
+                        $fileResults['originalContent'],
+                        $fileResults['fixedContent']
+                    );
+                    $io->writeln($diff);
+                }
+                
+                // Show change descriptions
                 foreach ($fileResults['results'] as $result) {
                     if ($result->isSuccessful()) {
                         $io->writeln("  ✓ " . $result->getChangeDescription());
@@ -378,6 +390,133 @@ final class PhpstanAutoFixCommand extends Command
         ];
 
         return new AutoFixService($strategies, $configuration);
+    }
+
+    /**
+     * Generate unified diff between original and fixed content.
+     */
+    private function generateUnifiedDiff(string $filePath, string $original, string $fixed): string
+    {
+        $originalLines = explode("\n", $original);
+        $fixedLines = explode("\n", $fixed);
+        
+        $diff = [];
+        $diff[] = "--- a/{$filePath}";
+        $diff[] = "+++ b/{$filePath}";
+        
+        // Find differences using a simple algorithm
+        $changes = $this->computeDiff($originalLines, $fixedLines);
+        
+        if (empty($changes)) {
+            return '';
+        }
+        
+        // Group changes into hunks
+        $hunks = $this->groupChangesIntoHunks($changes, $originalLines, $fixedLines);
+        
+        foreach ($hunks as $hunk) {
+            $diff[] = $hunk['header'];
+            foreach ($hunk['lines'] as $line) {
+                $diff[] = $line;
+            }
+        }
+        
+        return implode("\n", $diff);
+    }
+
+    /**
+     * Compute differences between two arrays of lines.
+     *
+     * @param string[] $original
+     * @param string[] $fixed
+     * @return array<int, array{type: string, oldIndex: int, newIndex: int}>
+     */
+    private function computeDiff(array $original, array $fixed): array
+    {
+        $changes = [];
+        $maxLen = max(count($original), count($fixed));
+        
+        for ($i = 0; $i < $maxLen; $i++) {
+            $oldLine = $original[$i] ?? null;
+            $newLine = $fixed[$i] ?? null;
+            
+            if ($oldLine !== $newLine) {
+                $changes[] = [
+                    'type' => $oldLine === null ? 'add' : ($newLine === null ? 'remove' : 'change'),
+                    'oldIndex' => $i,
+                    'newIndex' => $i,
+                ];
+            }
+        }
+        
+        return $changes;
+    }
+
+    /**
+     * Group changes into unified diff hunks.
+     *
+     * @param array<int, array{type: string, oldIndex: int, newIndex: int}> $changes
+     * @param string[] $originalLines
+     * @param string[] $fixedLines
+     * @return array<int, array{header: string, lines: string[]}>
+     */
+    private function groupChangesIntoHunks(array $changes, array $originalLines, array $fixedLines): array
+    {
+        if (empty($changes)) {
+            return [];
+        }
+        
+        $hunks = [];
+        $contextLines = 3;
+        $hunkStart = max(0, $changes[0]['oldIndex'] - $contextLines);
+        $hunkEnd = min(count($originalLines) - 1, end($changes)['oldIndex'] + $contextLines);
+        
+        $oldStart = $hunkStart + 1;
+        $oldCount = $hunkEnd - $hunkStart + 1;
+        $newStart = $hunkStart + 1;
+        $newCount = $hunkEnd - $hunkStart + 1;
+        
+        // Adjust for added/removed lines
+        $addedCount = 0;
+        $removedCount = 0;
+        foreach ($changes as $change) {
+            if ($change['type'] === 'add') {
+                $addedCount++;
+            } elseif ($change['type'] === 'remove') {
+                $removedCount++;
+            }
+        }
+        $newCount += $addedCount - $removedCount;
+        
+        $header = sprintf('@@ -%d,%d +%d,%d @@', $oldStart, $oldCount, $newStart, $newCount);
+        $lines = [];
+        
+        for ($i = $hunkStart; $i <= $hunkEnd; $i++) {
+            $oldLine = $originalLines[$i] ?? null;
+            $newLine = $fixedLines[$i] ?? null;
+            
+            if ($oldLine === $newLine) {
+                $lines[] = ' ' . $oldLine;
+            } elseif ($oldLine !== null && $newLine !== null) {
+                $lines[] = '-' . $oldLine;
+                $lines[] = '+' . $newLine;
+            } elseif ($oldLine !== null) {
+                $lines[] = '-' . $oldLine;
+            } elseif ($newLine !== null) {
+                $lines[] = '+' . $newLine;
+            }
+        }
+        
+        // Add any trailing new lines
+        for ($i = $hunkEnd + 1; $i < count($fixedLines); $i++) {
+            if (isset($fixedLines[$i]) && !isset($originalLines[$i])) {
+                $lines[] = '+' . $fixedLines[$i];
+            }
+        }
+        
+        $hunks[] = ['header' => $header, 'lines' => $lines];
+        
+        return $hunks;
     }
 }
 
