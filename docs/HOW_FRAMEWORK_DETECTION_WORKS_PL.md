@@ -1,44 +1,44 @@
-# How Framework Detection Works - Detailed Explanation
+# Jak działa Framework Detection - Szczegółowe wyjaśnienie
 
-> 🇵🇱 **Polish version**: [Jak działa Framework Detection (PL)](HOW_FRAMEWORK_DETECTION_WORKS_PL.md)
+> 🇬🇧 **English version**: [How Framework Detection Works (EN)](HOW_FRAMEWORK_DETECTION_WORKS.md)
 
-## Process Overview
+## Przegląd procesu
 
-Framework detection works in several steps when running the `phpstan-fixer` command:
+Wykrywanie frameworków działa w kilku krokach podczas uruchamiania komendy `phpstan-fixer`:
 
 ```
-1. Command execution
+1. Uruchomienie komendy
    ↓
-2. Framework detection (FrameworkDetector)
+2. Wykrywanie frameworka (FrameworkDetector)
    ↓
-3. Display information to user
+3. Wyświetlenie informacji użytkownikowi
    ↓
-4. Create list of fixers
+4. Tworzenie listy fixerów
    ↓
-5. Filter framework-specific fixers
+5. Filtrowanie fixerów specyficznych dla frameworka
    ↓
-6. Run analysis with filtered fixers
+6. Uruchomienie analizy z przefiltrowanymi fixerami
 ```
 
-## Step 1: Command Execution
+## Krok 1: Uruchomienie komendy
 
 ```php
-// In PhpstanAutoFixCommand::execute()
+// W PhpstanAutoFixCommand::execute()
 $framework = $this->detectFramework($io);
 ```
 
-When the user runs `phpstan-fixer suggest` or `phpstan-fixer apply`, the command starts by detecting the framework.
+Gdy użytkownik uruchamia `phpstan-fixer suggest` lub `phpstan-fixer apply`, komenda rozpoczyna od wykrycia frameworka.
 
-## Step 2: Framework Detection
+## Krok 2: Wykrywanie frameworka
 
 ### FrameworkDetector::detect()
 
-Detection happens in two stages:
+Wykrywanie odbywa się w dwóch etapach:
 
-#### 2.1. Check composer.json (priority)
+#### 2.1. Sprawdzenie composer.json (priorytet)
 
 ```php
-// FrameworkDetector.php, line 33-40
+// FrameworkDetector.php, linia 33-40
 $composerPath = rtrim($projectRoot, '/') . '/composer.json';
 if (file_exists($composerPath)) {
     $framework = $this->detectFromComposer($composerPath);
@@ -48,115 +48,115 @@ if (file_exists($composerPath)) {
 }
 ```
 
-**How it works:**
-- Reads `composer.json` from project directory
-- Checks `require` section for characteristic packages
-- Detection examples:
+**Jak to działa:**
+- Czyta `composer.json` z katalogu projektu
+- Sprawdza sekcję `require` pod kątem charakterystycznych pakietów
+- Przykłady wykrywania:
 
 ```json
 // Laravel
 {
   "require": {
-    "laravel/framework": "^10.0"  // ✅ Detects "laravel"
+    "laravel/framework": "^10.0"  // ✅ Wykryje "laravel"
   }
 }
 
 // Symfony
 {
   "require": {
-    "symfony/symfony": "^6.0"     // ✅ Detects "symfony"
+    "symfony/symfony": "^6.0"     // ✅ Wykryje "symfony"
   }
 }
 
-// Symfony (from components)
+// Symfony (z komponentów)
 {
   "require": {
-    "symfony/console": "^6.0",    // ✅ Detects "symfony" (≥2 components)
+    "symfony/console": "^6.0",    // ✅ Wykryje "symfony" (≥2 komponenty)
     "symfony/http-foundation": "^6.0"
   }
 }
 ```
 
-**Checking order:**
+**Kolejność sprawdzania:**
 1. Laravel (`laravel/framework`)
-2. Symfony (`symfony/symfony` or ≥2 `symfony/*` components)
+2. Symfony (`symfony/symfony` lub ≥2 komponenty `symfony/*`)
 3. CodeIgniter (`codeigniter4/framework`)
 4. CakePHP (`cakephp/cakephp`)
-5. Yii (`yiisoft/yii` or `yiisoft/yii2`)
+5. Yii (`yiisoft/yii` lub `yiisoft/yii2`)
 6. Laminas (`laminas/laminas-mvc`)
 7. Phalcon (`phalcon/cphalcon`)
 
-#### 2.2. Fallback: Check directory structure
+#### 2.2. Fallback: Sprawdzenie struktury katalogów
 
-If `composer.json` doesn't contain information, directory structure is checked:
+Jeśli `composer.json` nie zawiera informacji, sprawdzana jest struktura katalogów:
 
 ```php
-// FrameworkDetector.php, line 42-43
+// FrameworkDetector.php, linia 42-43
 // Fall back to directory structure
 return $this->detectFromDirectoryStructure($projectRoot);
 ```
 
-**Detection by structure:**
+**Wykrywanie przez strukturę:**
 
 ```php
-// Laravel - requires ≥3 of these indicators:
-- /artisan        (file)
-- /app            (directory)
-- /config         (directory)
-- /routes         (directory)
+// Laravel - wymaga ≥3 z tych wskaźników:
+- /artisan        (plik)
+- /app            (katalog)
+- /config         (katalog)
+- /routes         (katalog)
 
-// Symfony - requires ≥3 of these indicators:
-- /symfony.lock   (file)
-- /src            (directory)
-- /config         (directory)
-- /public         (directory)
+// Symfony - wymaga ≥3 z tych wskaźników:
+- /symfony.lock   (plik)
+- /src            (katalog)
+- /config         (katalog)
+- /public         (katalog)
 ```
 
-## Step 3: Display Information
+## Krok 3: Wyświetlenie informacji
 
 ```php
-// PhpstanAutoFixCommand.php, line 120-123
+// PhpstanAutoFixCommand.php, linia 120-123
 $framework = $this->detectFramework($io);
 if ($framework !== null) {
     $io->note("Detected framework: {$framework}");
 }
 ```
 
-**Example output:**
+**Przykład outputu:**
 ```
 $ phpstan-fixer suggest
 Note: Detected framework: laravel
 ```
 
-## Step 4: Create Fixer List
+## Krok 4: Tworzenie listy fixerów
 
 ```php
-// PhpstanAutoFixCommand.php, line 385-409
+// PhpstanAutoFixCommand.php, linia 385-409
 $allStrategies = [
     new MissingReturnDocblockFixer(...),      // Framework-agnostic
     new MissingParamDocblockFixer(...),       // Framework-agnostic
     new UndefinedPivotPropertyFixer(...),     // ⚠️ Laravel-specific!
     new UndefinedVariableFixer(...),          // Framework-agnostic
-    // ... more fixers
+    // ... więcej fixerów
 ];
 ```
 
-## Step 5: Filter Fixers
+## Krok 5: Filtrowanie fixerów
 
-### 5.1. Filtering Method
+### 5.1. Metoda filtrowania
 
 ```php
-// PhpstanAutoFixCommand.php, line 536-550
+// PhpstanAutoFixCommand.php, linia 536-550
 private function filterFrameworkSpecificFixers(array $strategies, ?string $framework): array
 {
     if ($framework === null) {
-        // No framework = exclude all framework-specific fixers
+        // Brak frameworka = wyklucz wszystkie framework-specific fixers
         return array_filter($strategies, function ($strategy): bool {
             return empty($strategy->getSupportedFrameworks());
         });
     }
 
-    // Framework detected = include framework-agnostic + matching framework-specific
+    // Framework wykryty = dołącz framework-agnostic + pasujące framework-specific
     return array_filter($strategies, function ($strategy) use ($framework): bool {
         $supportedFrameworks = $strategy->getSupportedFrameworks();
         return empty($supportedFrameworks) || in_array($framework, $supportedFrameworks, true);
@@ -164,85 +164,85 @@ private function filterFrameworkSpecificFixers(array $strategies, ?string $frame
 }
 ```
 
-### 5.2. How Do Fixers Declare Framework Support?
+### 5.2. Jak fixery deklarują wsparcie dla frameworków?
 
-Each fixer implements the `getSupportedFrameworks()` method:
+Każdy fixer implementuje metodę `getSupportedFrameworks()`:
 
 ```php
 // UndefinedPivotPropertyFixer.php
 public function getSupportedFrameworks(): array
 {
-    return ['laravel'];  // ✅ Only for Laravel
+    return ['laravel'];  // ✅ Tylko dla Laravel
 }
 
-// MissingReturnDocblockFixer (uses PriorityTrait)
+// MissingReturnDocblockFixer (używa PriorityTrait)
 public function getSupportedFrameworks(): array
 {
-    return [];  // ✅ Framework-agnostic (empty array = works everywhere)
+    return [];  // ✅ Framework-agnostic (pusta tablica = działa wszędzie)
 }
 ```
 
-### 5.3. Filtering Examples
+### 5.3. Przykłady filtrowania
 
-#### Example 1: Laravel Project
+#### Przykład 1: Projekt Laravel
 
-**Detection:** `framework = "laravel"`
+**Wykrycie:** `framework = "laravel"`
 
-**Fixer list before filtering:**
+**Lista fixerów przed filtrowaniem:**
 - ✅ MissingReturnDocblockFixer (getSupportedFrameworks() = [])
 - ✅ MissingParamDocblockFixer (getSupportedFrameworks() = [])
 - ✅ UndefinedPivotPropertyFixer (getSupportedFrameworks() = ['laravel'])
 
-**After filtering:**
+**Po filtrowaniu:**
 ```php
 // empty([]) || in_array('laravel', []) → true  ✅
 // empty([]) || in_array('laravel', []) → true  ✅
 // empty(['laravel']) || in_array('laravel', ['laravel']) → true  ✅
 ```
 
-**Result:** All 3 fixers are included
+**Wynik:** Wszystkie 3 fixery są dołączone
 
-#### Example 2: Symfony Project
+#### Przykład 2: Projekt Symfony
 
-**Detection:** `framework = "symfony"`
+**Wykrycie:** `framework = "symfony"`
 
-**Fixer list before filtering:**
+**Lista fixerów przed filtrowaniem:**
 - ✅ MissingReturnDocblockFixer (getSupportedFrameworks() = [])
 - ✅ MissingParamDocblockFixer (getSupportedFrameworks() = [])
 - ❌ UndefinedPivotPropertyFixer (getSupportedFrameworks() = ['laravel'])
 
-**After filtering:**
+**Po filtrowaniu:**
 ```php
 // empty([]) || in_array('symfony', []) → true  ✅
 // empty([]) || in_array('symfony', []) → true  ✅
 // empty(['laravel']) || in_array('symfony', ['laravel']) → false  ❌
 ```
 
-**Result:** Only the first 2 fixers are included
+**Wynik:** Tylko 2 pierwsze fixery są dołączone
 
-#### Example 3: Native PHP (no framework)
+#### Przykład 3: Native PHP (brak frameworka)
 
-**Detection:** `framework = null`
+**Wykrycie:** `framework = null`
 
-**Fixer list before filtering:**
+**Lista fixerów przed filtrowaniem:**
 - ✅ MissingReturnDocblockFixer (getSupportedFrameworks() = [])
 - ✅ MissingParamDocblockFixer (getSupportedFrameworks() = [])
 - ❌ UndefinedPivotPropertyFixer (getSupportedFrameworks() = ['laravel'])
 
-**After filtering:**
+**Po filtrowaniu:**
 ```php
 // empty([]) → true  ✅
 // empty([]) → true  ✅
 // empty(['laravel']) → false  ❌
 ```
 
-**Result:** Only the first 2 fixers are included
+**Wynik:** Tylko 2 pierwsze fixery są dołączone
 
-## Step 6: Run Analysis
+## Krok 6: Uruchomienie analizy
 
-The filtered fixer list is passed to `AutoFixService`, which uses only appropriate fixers to fix PHPStan errors.
+Przefiltrowana lista fixerów jest przekazywana do `AutoFixService`, który używa tylko odpowiednich fixerów do naprawy błędów PHPStan.
 
-## Flow Diagram
+## Diagram przepływu
 
 ```
 ┌─────────────────────────────────────┐
@@ -253,33 +253,33 @@ The filtered fixer list is passed to `AutoFixService`, which uses only appropria
 ┌─────────────────────────────────────┐
 │  detectFramework()                  │
 │  ┌──────────────────────────────┐   │
-│  │ 1. Check composer.json       │   │
+│  │ 1. Sprawdź composer.json     │   │
 │  │    → laravel/framework?      │   │
 │  │    → symfony/symfony?        │   │
 │  │    → ...                     │   │
 │  └──────────────────────────────┘   │
 │  ┌──────────────────────────────┐   │
-│  │ 2. Check directory structure │   │
+│  │ 2. Sprawdź strukturę katalogów│  │
 │  │    → /artisan, /app?         │   │
 │  │    → /symfony.lock, /src?    │   │
 │  └──────────────────────────────┘   │
-│  → return "laravel" | "symfony" | null│
+│  → zwróć "laravel" | "symfony" | null│
 └──────────────┬──────────────────────┘
                │
                ▼
 ┌─────────────────────────────────────┐
 │  createDefaultAutoFixService()      │
 │  ┌──────────────────────────────┐   │
-│  │ Create all fixers            │   │
+│  │ Utwórz wszystkie fixery      │   │
 │  └──────────────────────────────┘   │
 │  ┌──────────────────────────────┐   │
 │  │ filterFrameworkSpecificFixers│   │
 │  │                              │   │
 │  │ if (framework === null)      │   │
-│  │   → only getSupportedFrameworks() == []│
+│  │   → tylko getSupportedFrameworks() == []│
 │  │ else                         │   │
 │  │   → getSupportedFrameworks() == []│
-│  │     OR                       │   │
+│  │     LUB                      │   │
 │  │     framework in getSupportedFrameworks()│
 │  └──────────────────────────────┘   │
 └──────────────┬──────────────────────┘
@@ -287,92 +287,93 @@ The filtered fixer list is passed to `AutoFixService`, which uses only appropria
                ▼
 ┌─────────────────────────────────────┐
 │  AutoFixService                     │
-│  Uses only filtered fixers          │
-│  to fix errors                      │
+│  Używa tylko przefiltrowanych       │
+│  fixerów do naprawy błędów          │
 └─────────────────────────────────────┘
 ```
 
-## Key Concepts
+## Kluczowe koncepcje
 
 ### Framework-agnostic fixers
-- Fixers that work in every PHP project
-- `getSupportedFrameworks()` returns `[]`
-- **Always** included
+- Fixery, które działają w każdym projekcie PHP
+- `getSupportedFrameworks()` zwraca `[]`
+- **Zawsze** są dołączane
 
 ### Framework-specific fixers
-- Fixers that work only in specific frameworks
-- `getSupportedFrameworks()` returns e.g. `['laravel']`
-- Included **only** when detected framework matches
+- Fixery, które działają tylko w konkretnych frameworkach
+- `getSupportedFrameworks()` zwraca np. `['laravel']`
+- Są dołączane **tylko** gdy wykryty framework pasuje
 
-### Detection Priorities
-1. **composer.json** (most reliable)
-2. **Directory structure** (fallback)
-3. **Checking order** (Laravel → Symfony → others)
+### Priorytety wykrywania
+1. **composer.json** (najbardziej niezawodne)
+2. **Struktura katalogów** (fallback)
+3. **Kolejność sprawdzania** (Laravel → Symfony → inne)
 
-## Usage Examples
+## Przykłady użycia
 
-### Laravel Project
+### Projekt Laravel
 ```bash
 $ phpstan-fixer suggest
 Note: Detected framework: laravel
 
-# Used fixers:
+# Używane fixery:
 # ✅ MissingReturnDocblockFixer (framework-agnostic)
 # ✅ MissingParamDocblockFixer (framework-agnostic)
-# ✅ UndefinedPivotPropertyFixer (laravel-specific) ← INCLUDED!
+# ✅ UndefinedPivotPropertyFixer (laravel-specific) ← DOŁĄCZONY!
 ```
 
-### Symfony Project
+### Projekt Symfony
 ```bash
 $ phpstan-fixer suggest
 Note: Detected framework: symfony
 
-# Used fixers:
+# Używane fixery:
 # ✅ MissingReturnDocblockFixer (framework-agnostic)
 # ✅ MissingParamDocblockFixer (framework-agnostic)
-# ❌ UndefinedPivotPropertyFixer (laravel-specific) ← EXCLUDED!
+# ❌ UndefinedPivotPropertyFixer (laravel-specific) ← WYKLUCZONY!
 ```
 
 ### Native PHP
 ```bash
 $ phpstan-fixer suggest
-# (no framework message)
+# (brak komunikatu o frameworku)
 
-# Used fixers:
+# Używane fixery:
 # ✅ MissingReturnDocblockFixer (framework-agnostic)
 # ✅ MissingParamDocblockFixer (framework-agnostic)
-# ❌ UndefinedPivotPropertyFixer (laravel-specific) ← EXCLUDED!
+# ❌ UndefinedPivotPropertyFixer (laravel-specific) ← WYKLUCZONY!
 ```
 
-## Extending
+## Rozszerzanie
 
-### How to Add a New Framework?
+### Jak dodać nowy framework?
 
-1. **In FrameworkDetector::detectFromComposer():**
+1. **W FrameworkDetector::detectFromComposer():**
 ```php
-if (isset($require['new-framework/package'])) {
-    return 'new-framework';
+if (isset($require['nowy-framework/package'])) {
+    return 'nowy-framework';
 }
 ```
 
-2. **In FrameworkDetector::detectFromDirectoryStructure():**
+2. **W FrameworkDetector::detectFromDirectoryStructure():**
 ```php
-// Add directory structure indicators
-$newFrameworkIndicators = [...];
+// Dodaj wskaźniki struktury katalogów
+$nowyFrameworkIndicators = [...];
 ```
 
-### How to Create a Framework-Specific Fixer?
+### Jak utworzyć framework-specific fixer?
 
 ```php
-class NewFrameworkFixer implements FixStrategyInterface
+class NowyFrameworkFixer implements FixStrategyInterface
 {
     use PriorityTrait;
 
     public function getSupportedFrameworks(): array
     {
-        return ['new-framework'];  // ✅ Only for this framework
+        return ['nowy-framework'];  // ✅ Tylko dla tego frameworka
     }
 
-    // ... rest of implementation
+    // ... reszta implementacji
 }
 ```
+

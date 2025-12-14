@@ -1,5 +1,7 @@
 # Pre-commit Hook
 
+> 🇵🇱 **Polish version**: [Pre-commit Hook (PL)](PRE_COMMIT_HOOK_PL.md)
+
 This repository includes a Git pre-commit hook that automatically runs code quality checks before allowing commits.
 
 ## What It Does
