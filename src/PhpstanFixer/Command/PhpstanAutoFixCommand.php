@@ -14,6 +14,7 @@ namespace PhpstanFixer\Command;
 use PhpstanFixer\AutoFixService;
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
+use PhpstanFixer\Command\FixerFactory;
 use PhpstanFixer\Framework\FrameworkDetector;
 use PhpstanFixer\Configuration\Configuration;
 use PhpstanFixer\Configuration\ConfigurationLoader;
@@ -496,59 +497,18 @@ final class PhpstanAutoFixCommand extends Command
             return [];
         }
 
+        $factory = new FixerFactory(
+            new PhpFileAnalyzer(),
+            new DocblockManipulator()
+        );
+
         $strategies = [];
-        $analyzer = new PhpFileAnalyzer();
-        $docblockManipulator = new DocblockManipulator();
-
         foreach ($customFixers as $fixerClass) {
-            if (!class_exists($fixerClass)) {
-                throw new \RuntimeException(
-                    "Custom fixer class not found: {$fixerClass}. Make sure the class is autoloaded."
-                );
-            }
-
-            if (!is_subclass_of($fixerClass, FixStrategyInterface::class)) {
-                throw new \RuntimeException(
-                    "Custom fixer class {$fixerClass} must implement " . FixStrategyInterface::class
-                );
-            }
-
-            // Try to instantiate with common dependencies
             try {
-                // Try with analyzer and docblock manipulator (most common)
-                $reflection = new \ReflectionClass($fixerClass);
-                $constructor = $reflection->getConstructor();
-
-                if ($constructor === null) {
-                    $strategy = new $fixerClass();
-                } else {
-                    $params = $constructor->getParameters();
-                    $args = [];
-
-                    foreach ($params as $param) {
-                        $type = $param->getType();
-                        if ($type instanceof \ReflectionNamedType) {
-                            $typeName = $type->getName();
-                            if ($typeName === PhpFileAnalyzer::class || $typeName === 'PhpstanFixer\CodeAnalysis\PhpFileAnalyzer') {
-                                $args[] = $analyzer;
-                            } elseif ($typeName === DocblockManipulator::class || $typeName === 'PhpstanFixer\CodeAnalysis\DocblockManipulator') {
-                                $args[] = $docblockManipulator;
-                            } else {
-                                // For other types, try to instantiate or use null
-                                $args[] = null;
-                            }
-                        } else {
-                            $args[] = null;
-                        }
-                    }
-
-                    $strategy = new $fixerClass(...$args);
-                }
-
-                $strategies[] = $strategy;
-            } catch (\Throwable $e) {
+                $strategies[] = $factory->createFixer($fixerClass);
+            } catch (\RuntimeException $e) {
                 throw new \RuntimeException(
-                    "Failed to instantiate custom fixer {$fixerClass}: " . $e->getMessage(),
+                    "Failed to load custom fixer {$fixerClass}: " . $e->getMessage(),
                     0,
                     $e
                 );
