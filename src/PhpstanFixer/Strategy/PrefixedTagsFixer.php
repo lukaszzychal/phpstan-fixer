@@ -16,6 +16,7 @@ use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
+use PhpstanFixer\Strategy\FileValidationTrait;
 
 /**
  * Adds @phpstan-param / @phpstan-return for advanced types (class-string, literal-string, generics).
@@ -25,6 +26,7 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class PrefixedTagsFixer implements FixStrategyInterface
 {
     use PriorityTrait;
+    use FileValidationTrait;
     private const ADVANCED_TYPE_PATTERN = '/class-string|literal-string|non-empty-string|numeric-string|callable-string|trait-string|array-key|value-of|key-of|list<|array<|array\{|int<|string<|positive-int|negative-int|non-falsy-string|truthy-string/i';
 
     public function __construct(
@@ -40,15 +42,12 @@ final class PrefixedTagsFixer implements FixStrategyInterface
 
     public function fix(Issue $issue, string $fileContent): FixResult
     {
-        if (!file_exists($issue->getFilePath())) {
-            return FixResult::failure($issue, $fileContent, 'File does not exist');
+        $validation = $this->validateFileAndParse($issue, $fileContent, $this->analyzer);
+        if ($validation instanceof FixResult) {
+            return $validation;
         }
 
-        $ast = $this->analyzer->parse($fileContent);
-        if ($ast === null) {
-            return FixResult::failure($issue, $fileContent, 'Could not parse file');
-        }
-
+        $ast = $validation['ast'];
         $paramInfo = $this->extractParamInfo($issue->getMessage());
         $returnType = $this->extractReturnType($issue->getMessage());
 

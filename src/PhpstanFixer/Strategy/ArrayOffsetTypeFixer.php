@@ -17,6 +17,7 @@ use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
+use PhpstanFixer\Strategy\FileValidationTrait;
 use PhpstanFixer\Strategy\FunctionLocatorTrait;
 
 /**
@@ -45,15 +46,12 @@ final class ArrayOffsetTypeFixer implements FixStrategyInterface
 
     public function fix(Issue $issue, string $fileContent): FixResult
     {
-        if (!file_exists($issue->getFilePath())) {
-            return FixResult::failure($issue, $fileContent, 'File does not exist');
+        $validation = $this->validateFileAndParse($issue, $fileContent, $this->analyzer);
+        if ($validation instanceof FixResult) {
+            return $validation;
         }
 
-        $ast = $this->analyzer->parse($fileContent);
-        if ($ast === null) {
-            return FixResult::failure($issue, $fileContent, 'Could not parse file');
-        }
-
+        $ast = $validation['ast'];
         $targetLine = $issue->getLine();
         $paramNameFromMessage = ErrorMessageParser::parseParameterName($issue->getMessage());
         $paramName = $paramNameFromMessage !== null ? '$' . $paramNameFromMessage : null;
