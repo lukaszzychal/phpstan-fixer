@@ -156,6 +156,11 @@ final class MissingReturnDocblockFixer implements FixStrategyInterface
         return 'MissingReturnDocblockFixer';
     }
 
+    public function getPriority(): int
+    {
+        return 100;
+    }
+
     /**
      * Format a PHP-Parser type node to string.
      */

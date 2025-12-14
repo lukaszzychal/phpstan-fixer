@@ -103,5 +103,57 @@ final class AutoFixServiceTest extends TestCase
         $this->assertSame(100, $strategies[0]->getPriority());
         $this->assertSame(0, $strategies[1]->getPriority());
     }
+
+    public function testStrategiesWithEqualPriorityPreserveInsertionOrder(): void
+    {
+        $fixerA = new class implements \PhpstanFixer\Strategy\FixStrategyInterface {
+            public function canFix(\PhpstanFixer\Issue $issue): bool { return false; }
+            public function fix(\PhpstanFixer\Issue $issue, string $fileContent): \PhpstanFixer\FixResult {
+                return \PhpstanFixer\FixResult::failure($issue, $fileContent, '');
+            }
+            public function getDescription(): string { return ''; }
+            public function getName(): string { return 'FixerA'; }
+            public function getPriority(): int { return 50; }
+        };
+
+        $fixerB = new class implements \PhpstanFixer\Strategy\FixStrategyInterface {
+            public function canFix(\PhpstanFixer\Issue $issue): bool { return false; }
+            public function fix(\PhpstanFixer\Issue $issue, string $fileContent): \PhpstanFixer\FixResult {
+                return \PhpstanFixer\FixResult::failure($issue, $fileContent, '');
+            }
+            public function getDescription(): string { return ''; }
+            public function getName(): string { return 'FixerB'; }
+            public function getPriority(): int { return 50; }
+        };
+
+        $fixerC = new class implements \PhpstanFixer\Strategy\FixStrategyInterface {
+            public function canFix(\PhpstanFixer\Issue $issue): bool { return false; }
+            public function fix(\PhpstanFixer\Issue $issue, string $fileContent): \PhpstanFixer\FixResult {
+                return \PhpstanFixer\FixResult::failure($issue, $fileContent, '');
+            }
+            public function getDescription(): string { return ''; }
+            public function getName(): string { return 'FixerC'; }
+            public function getPriority(): int { return 50; }
+        };
+
+        // All have same priority - insertion order should be preserved
+        $service = new AutoFixService([$fixerA, $fixerB, $fixerC]);
+        
+        // Use reflection to check internal order
+        $reflection = new \ReflectionClass($service);
+        $strategiesProperty = $reflection->getProperty('strategies');
+        $strategiesProperty->setAccessible(true);
+        $strategies = $strategiesProperty->getValue($service);
+        
+        // Order should be preserved: A, B, C
+        $this->assertSame('FixerA', $strategies[0]->getName());
+        $this->assertSame('FixerB', $strategies[1]->getName());
+        $this->assertSame('FixerC', $strategies[2]->getName());
+        
+        // Verify all have same priority
+        $this->assertSame(50, $strategies[0]->getPriority());
+        $this->assertSame(50, $strategies[1]->getPriority());
+        $this->assertSame(50, $strategies[2]->getPriority());
+    }
 }
 

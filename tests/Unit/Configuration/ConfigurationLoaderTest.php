@@ -252,6 +252,191 @@ JSON;
         $this->loader->loadFromFile($filePath);
     }
 
+    public function testLoadFromJsonFileWithFixersSection(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "rules": {
+    "Access to an undefined property": "fix"
+  },
+  "fixers": {
+    "enabled": [
+      "MissingReturnDocblockFixer",
+      "MissingParamDocblockFixer"
+    ],
+    "disabled": [
+      "UndefinedPivotPropertyFixer"
+    ],
+    "priorities": {
+      "MissingReturnDocblockFixer": 100,
+      "MissingParamDocblockFixer": 90
+    }
+  }
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $config = $this->loader->loadFromFile($filePath);
+
+        $this->assertInstanceOf(Configuration::class, $config);
+        $enabled = $config->getEnabledFixers();
+        $this->assertCount(2, $enabled);
+        $this->assertContains('MissingReturnDocblockFixer', $enabled);
+        $this->assertContains('MissingParamDocblockFixer', $enabled);
+
+        $disabled = $config->getDisabledFixers();
+        $this->assertCount(1, $disabled);
+        $this->assertContains('UndefinedPivotPropertyFixer', $disabled);
+
+        $this->assertSame(100, $config->getFixerPriority('MissingReturnDocblockFixer'));
+        $this->assertSame(90, $config->getFixerPriority('MissingParamDocblockFixer'));
+    }
+
+    public function testLoadFromJsonFileWithOnlyEnabledFixers(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "fixers": {
+    "enabled": ["MissingReturnDocblockFixer"]
+  }
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $config = $this->loader->loadFromFile($filePath);
+
+        $this->assertTrue($config->isFixerEnabled('MissingReturnDocblockFixer'));
+        $this->assertFalse($config->isFixerEnabled('MissingParamDocblockFixer'));
+    }
+
+    public function testLoadFromJsonFileWithOnlyDisabledFixers(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "fixers": {
+    "disabled": ["UndefinedPivotPropertyFixer"]
+  }
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $config = $this->loader->loadFromFile($filePath);
+
+        $this->assertFalse($config->isFixerEnabled('UndefinedPivotPropertyFixer'));
+        $this->assertTrue($config->isFixerEnabled('MissingReturnDocblockFixer'));
+    }
+
+    public function testLoadFromJsonFileWithOnlyPriorities(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "fixers": {
+    "priorities": {
+      "MissingReturnDocblockFixer": 100
+    }
+  }
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $config = $this->loader->loadFromFile($filePath);
+
+        $this->assertSame(100, $config->getFixerPriority('MissingReturnDocblockFixer'));
+        $this->assertNull($config->getFixerPriority('MissingParamDocblockFixer'));
+    }
+
+    public function testLoadFromYamlFileWithFixersSection(): void
+    {
+        if (!function_exists('yaml_parse') && !class_exists(\Symfony\Component\Yaml\Yaml::class)) {
+            $this->markTestSkipped('YAML extension or Symfony YAML is not available');
+            return;
+        }
+
+        $yamlContent = <<<'YAML'
+fixers:
+  enabled:
+    - MissingReturnDocblockFixer
+  disabled:
+    - UndefinedPivotPropertyFixer
+  priorities:
+    MissingReturnDocblockFixer: 100
+YAML;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.yaml';
+        file_put_contents($filePath, $yamlContent);
+
+        $config = $this->loader->loadFromFile($filePath);
+
+        $this->assertTrue($config->isFixerEnabled('MissingReturnDocblockFixer'));
+        $this->assertFalse($config->isFixerEnabled('UndefinedPivotPropertyFixer'));
+        $this->assertSame(100, $config->getFixerPriority('MissingReturnDocblockFixer'));
+    }
+
+    public function testThrowsWhenFixersEnabledIsNotArray(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "fixers": {
+    "enabled": "not-an-array"
+  }
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Configuration "fixers.enabled" must be an array');
+
+        $this->loader->loadFromFile($filePath);
+    }
+
+    public function testThrowsWhenFixersDisabledIsNotArray(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "fixers": {
+    "disabled": "not-an-array"
+  }
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Configuration "fixers.disabled" must be an array');
+
+        $this->loader->loadFromFile($filePath);
+    }
+
+    public function testThrowsWhenFixersPrioritiesIsNotObject(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "fixers": {
+    "priorities": "not-an-object"
+  }
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Configuration "fixers.priorities" must be an object');
+
+        $this->loader->loadFromFile($filePath);
+    }
+
     private function removeDirectory(string $dir): void
     {
         if (!is_dir($dir)) {

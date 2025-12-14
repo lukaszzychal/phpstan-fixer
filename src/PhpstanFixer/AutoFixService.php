@@ -44,12 +44,33 @@ final class AutoFixService
 
     /**
      * Sort strategies by priority (higher priority = executed first).
+     * When priorities are equal, preserves original insertion order (stable sort).
      */
     private function sortStrategiesByPriority(): void
     {
-        usort($this->strategies, function (FixStrategyInterface $a, FixStrategyInterface $b): int {
-            return $b->getPriority() <=> $a->getPriority();
+        // Use Schwartzian transform to make sort stable: preserve insertion order when priorities are equal
+        $decorated = array_map(
+            fn(FixStrategyInterface $strategy, int $index): array => [
+                'priority' => $strategy->getPriority(),
+                'index' => $index,
+                'strategy' => $strategy,
+            ],
+            $this->strategies,
+            array_keys($this->strategies)
+        );
+
+        usort($decorated, function (array $a, array $b): int {
+            // First compare by priority (descending)
+            $priorityComparison = $b['priority'] <=> $a['priority'];
+            if ($priorityComparison !== 0) {
+                return $priorityComparison;
+            }
+            // If priorities are equal, preserve original insertion order (ascending index)
+            return $a['index'] <=> $b['index'];
         });
+
+        // Extract strategies back from decorated array
+        $this->strategies = array_column($decorated, 'strategy');
     }
 
     /**

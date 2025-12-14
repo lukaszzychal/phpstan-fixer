@@ -153,6 +153,11 @@ final class MissingParamDocblockFixer implements FixStrategyInterface
         return 'MissingParamDocblockFixer';
     }
 
+    public function getPriority(): int
+    {
+        return 90;
+    }
+
     /**
      * Extract parameter information from error message.
      *

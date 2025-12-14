@@ -191,7 +191,117 @@ final class ConfigurationLoader
             }
         }
 
-        return new Configuration($rules, $this->createRule('default', $defaultAction));
+        // Parse fixers section
+        [$enabledFixers, $disabledFixers, $fixerPriorities] = $this->parseFixersSection($data);
+
+        return new Configuration(
+            $rules,
+            $this->createRule('default', $defaultAction),
+            $enabledFixers,
+            $disabledFixers,
+            $fixerPriorities
+        );
+    }
+
+    /**
+     * Parse fixers section from configuration data.
+     *
+     * @param array<string, mixed> $data Parsed configuration data
+     * @return array{0: array<string>, 1: array<string>, 2: array<string, int>} [enabled, disabled, priorities]
+     */
+    private function parseFixersSection(array $data): array
+    {
+        $enabledFixers = [];
+        $disabledFixers = [];
+        $fixerPriorities = [];
+
+        if (!isset($data['fixers'])) {
+            return [$enabledFixers, $disabledFixers, $fixerPriorities];
+        }
+
+        if (!is_array($data['fixers'])) {
+            throw new \RuntimeException('Configuration "fixers" must be an object/map.');
+        }
+
+        $fixersData = $data['fixers'];
+
+        // Parse enabled fixers
+        if (isset($fixersData['enabled'])) {
+            if (!is_array($fixersData['enabled'])) {
+                throw new \RuntimeException('Configuration "fixers.enabled" must be an array.');
+            }
+            $enabledFixers = $this->extractStringArray($fixersData['enabled'], 'fixers.enabled');
+        }
+
+        // Parse disabled fixers
+        if (isset($fixersData['disabled'])) {
+            if (!is_array($fixersData['disabled'])) {
+                throw new \RuntimeException('Configuration "fixers.disabled" must be an array.');
+            }
+            $disabledFixers = $this->extractStringArray($fixersData['disabled'], 'fixers.disabled');
+        }
+
+        // Parse priorities
+        if (isset($fixersData['priorities'])) {
+            if (!is_array($fixersData['priorities'])) {
+                throw new \RuntimeException('Configuration "fixers.priorities" must be an object.');
+            }
+            $fixerPriorities = $this->extractPriorities($fixersData['priorities']);
+        }
+
+        return [$enabledFixers, $disabledFixers, $fixerPriorities];
+    }
+
+    /**
+     * Extract string array from configuration data.
+     *
+     * @param mixed $data The data to extract from
+     * @param string $path The configuration path for error messages
+     * @return array<string>
+     */
+    private function extractStringArray(mixed $data, string $path): array
+    {
+        $result = [];
+        foreach ($data as $index => $item) {
+            if (!is_string($item)) {
+                throw new \RuntimeException(sprintf(
+                    'Configuration "%s[%d]" must be a string, got %s',
+                    $path,
+                    $index,
+                    gettype($item)
+                ));
+            }
+            $result[] = $item;
+        }
+        return $result;
+    }
+
+    /**
+     * Extract fixer priorities from configuration data.
+     *
+     * @param array<string, mixed> $data The priorities data
+     * @return array<string, int>
+     */
+    private function extractPriorities(array $data): array
+    {
+        $priorities = [];
+        foreach ($data as $fixerName => $priority) {
+            if (!is_string($fixerName)) {
+                throw new \RuntimeException(sprintf(
+                    'Configuration "fixers.priorities" keys must be strings, got %s',
+                    gettype($fixerName)
+                ));
+            }
+            if (!is_int($priority)) {
+                throw new \RuntimeException(sprintf(
+                    'Configuration "fixers.priorities[\"%s\"]" must be an integer, got %s',
+                    $fixerName,
+                    gettype($priority)
+                ));
+            }
+            $priorities[$fixerName] = $priority;
+        }
+        return $priorities;
     }
 
     /**
