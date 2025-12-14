@@ -16,6 +16,7 @@ use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
+use PhpstanFixer\Strategy\FileValidationTrait;
 
 /**
  * Fixes missing generic type parameters in Collection types.
@@ -26,6 +27,8 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class CollectionGenericDocblockFixer implements FixStrategyInterface
 {
     use PriorityTrait;
+    use FileValidationTrait;
+
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator

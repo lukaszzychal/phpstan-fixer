@@ -16,6 +16,7 @@ use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
+use PhpstanFixer\Strategy\FileValidationTrait;
 
 /**
  * Adds @internal annotation when accessing internal elements.
@@ -25,6 +26,8 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class InternalAnnotationFixer implements FixStrategyInterface
 {
     use PriorityTrait;
+    use FileValidationTrait;
+
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator
@@ -38,15 +41,12 @@ final class InternalAnnotationFixer implements FixStrategyInterface
 
     public function fix(Issue $issue, string $fileContent): FixResult
     {
-        if (!file_exists($issue->getFilePath())) {
-            return FixResult::failure($issue, $fileContent, 'File does not exist');
+        $validation = $this->validateFileAndParse($issue, $fileContent, $this->analyzer);
+        if ($validation instanceof FixResult) {
+            return $validation;
         }
 
-        $ast = $this->analyzer->parse($fileContent);
-        if ($ast === null) {
-            return FixResult::failure($issue, $fileContent, 'Could not parse file');
-        }
-
+        $ast = $validation['ast'];
         $classes = $this->analyzer->getClasses($ast);
         $targetLine = $issue->getLine();
         $targetClass = null;

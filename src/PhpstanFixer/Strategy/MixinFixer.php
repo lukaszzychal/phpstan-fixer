@@ -32,6 +32,7 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class MixinFixer implements FixStrategyInterface
 {
     use PriorityTrait;
+    use FileValidationTrait;
     private NodeFinder $nodeFinder;
 
     public function __construct(
@@ -50,14 +51,12 @@ final class MixinFixer implements FixStrategyInterface
 
     public function fix(Issue $issue, string $fileContent): FixResult
     {
-        if (!file_exists($issue->getFilePath())) {
-            return FixResult::failure($issue, $fileContent, 'File does not exist');
+        $validation = $this->validateFileAndParse($issue, $fileContent, $this->analyzer);
+        if ($validation instanceof FixResult) {
+            return $validation;
         }
 
-        $ast = $this->analyzer->parse($fileContent);
-        if ($ast === null) {
-            return FixResult::failure($issue, $fileContent, 'Could not parse file');
-        }
+        $ast = $validation['ast'];
 
         $targetLine = $issue->getLine();
         

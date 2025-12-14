@@ -18,6 +18,7 @@ use PhpstanFixer\Issue;
 use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\NodeFinder;
 use PhpstanFixer\Strategy\PriorityTrait;
+use PhpstanFixer\Strategy\FileValidationTrait;
 
 /**
  * Adds @phpstan-require-implements InterfaceName to traits requiring specific interface implementation.
@@ -27,6 +28,8 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class RequireImplementsFixer implements FixStrategyInterface
 {
     use PriorityTrait;
+    use FileValidationTrait;
+
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator
@@ -43,14 +46,12 @@ final class RequireImplementsFixer implements FixStrategyInterface
 
     public function fix(Issue $issue, string $fileContent): FixResult
     {
-        if (!file_exists($issue->getFilePath())) {
-            return FixResult::failure($issue, $fileContent, 'File does not exist');
+        $validation = $this->validateFileAndParse($issue, $fileContent, $this->analyzer);
+        if ($validation instanceof FixResult) {
+            return $validation;
         }
 
-        $ast = $this->analyzer->parse($fileContent);
-        if ($ast === null) {
-            return FixResult::failure($issue, $fileContent, 'Could not parse file');
-        }
+        $ast = $validation['ast'];
 
         $interface = $this->extractInterface($issue->getMessage());
         if ($interface === null) {
