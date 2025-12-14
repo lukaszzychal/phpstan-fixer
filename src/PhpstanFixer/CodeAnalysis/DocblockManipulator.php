@@ -627,4 +627,3 @@ final class DocblockManipulator
         return trim($result);
     }
 }
-
