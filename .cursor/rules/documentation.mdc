@@ -1,0 +1,71 @@
+---
+description: "Documentation guidelines and bilingual documentation process"
+globs: ["**/*.md", "docs/**/*"]
+alwaysApply: true
+---
+
+## Documentation
+
+### Bilingual Documentation (English/Polish)
+
+This project supports bilingual documentation. When creating or updating documentation:
+
+1. **Write English version first** - Create the English version (`DOCUMENT_NAME.md`) as the primary source
+2. **Then translate to Polish** - Create the Polish version (`DOCUMENT_NAME_PL.md`) after the English version is complete
+3. **Maintain consistency** - Keep structural consistency between language versions (same headers, sections, order)
+4. **Update both versions** - When updating documentation, update both EN and PL versions
+
+### File Naming Convention
+
+- **English version**: `DOCUMENT_NAME.md` (no suffix)
+- **Polish version**: `DOCUMENT_NAME_PL.md` (suffix `_PL`)
+
+Examples:
+- `README.md` / `README_PL.md`
+- `docs/FRAMEWORK_DETECTION.md` / `docs/FRAMEWORK_DETECTION_PL.md`
+
+### Document Structure
+
+Each document should include language links at the top:
+
+**English document:**
+```markdown
+# Document Title
+
+> 🇵🇱 **Polish version**: [Tytuł dokumentu (PL)](DOCUMENT_NAME_PL.md)
+```
+
+**Polish document:**
+```markdown
+# Tytuł dokumentu
+
+> 🇬🇧 **English version**: [Document Title (EN)](DOCUMENT_NAME.md)
+```
+
+### Guidelines
+
+- See [Bilingual Documentation Guidelines](docs/BILINGUAL_DOCUMENTATION_GUIDELINES.md) for detailed instructions
+- Code examples should remain in English (no translation needed)
+- Technical terms can be kept in English or use common Polish translations
+- Verify structural consistency using `./scripts/verify_doc_structure.sh` before committing
+
+### Process
+
+1. Write/create English version (`DOCUMENT_NAME.md`)
+2. Add language link placeholder: `> 🇵🇱 **Polish version**: [Title (PL)](DOCUMENT_NAME_PL.md) *(coming soon)*`
+3. Translate to Polish (`DOCUMENT_NAME_PL.md`)
+4. Update English version link (remove `*(coming soon)*`)
+5. Verify consistency with verification script
+6. Commit both versions together
+
+### Documents Requiring Translation
+
+✅ **Require PL version**:
+- `README.md` and all `docs/*.md` files
+- Technical documentation
+- User guides and tutorials
+
+❌ **Do NOT require translation**:
+- `CHANGELOG.md` (English only)
+- Configuration files comments (English only)
+- Test code comments (English only)
