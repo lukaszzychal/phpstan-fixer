@@ -254,5 +254,120 @@ final class ConfigurationTest extends TestCase
 
         $this->assertFalse($config->isFixerEnabled('MissingReturnDocblockFixer'));
     }
+
+    public function testGetIncludePathsReturnsEmptyArrayByDefault(): void
+    {
+        $config = new Configuration();
+
+        $this->assertSame([], $config->getIncludePaths());
+    }
+
+    public function testGetIncludePathsReturnsConfiguredList(): void
+    {
+        $includePaths = ['src/', 'app/'];
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            [],
+            [],
+            [],
+            $includePaths
+        );
+
+        $this->assertSame($includePaths, $config->getIncludePaths());
+    }
+
+    public function testGetExcludePathsReturnsEmptyArrayByDefault(): void
+    {
+        $config = new Configuration();
+
+        $this->assertSame([], $config->getExcludePaths());
+    }
+
+    public function testGetExcludePathsReturnsConfiguredList(): void
+    {
+        $excludePaths = ['vendor/', 'tests/'];
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            [],
+            [],
+            [],
+            [],
+            $excludePaths
+        );
+
+        $this->assertSame($excludePaths, $config->getExcludePaths());
+    }
+
+    public function testIsPathAllowedReturnsTrueWhenNoFiltersConfigured(): void
+    {
+        $config = new Configuration();
+
+        $this->assertTrue($config->isPathAllowed('src/SomeClass.php'));
+    }
+
+    public function testIsPathAllowedReturnsTrueWhenPathMatchesIncludePattern(): void
+    {
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            [],
+            [],
+            [],
+            ['src/']
+        );
+
+        $this->assertTrue($config->isPathAllowed('src/SomeClass.php'));
+        $this->assertFalse($config->isPathAllowed('tests/SomeTest.php'));
+    }
+
+    public function testIsPathAllowedReturnsFalseWhenPathMatchesExcludePattern(): void
+    {
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            [],
+            [],
+            [],
+            [],
+            ['tests/']
+        );
+
+        $this->assertFalse($config->isPathAllowed('tests/SomeTest.php'));
+        $this->assertTrue($config->isPathAllowed('src/SomeClass.php'));
+    }
+
+    public function testIsPathAllowedWithGlobPatterns(): void
+    {
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            [],
+            [],
+            [],
+            ['src/'],
+            ['**/*Test.php']
+        );
+
+        $this->assertTrue($config->isPathAllowed('src/SomeClass.php'));
+        $this->assertFalse($config->isPathAllowed('src/SomeTest.php'));
+    }
+
+    public function testIsPathAllowedExcludeTakesPrecedenceOverInclude(): void
+    {
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            [],
+            [],
+            [],
+            ['src/'],
+            ['src/Excluded.php']
+        );
+
+        $this->assertTrue($config->isPathAllowed('src/SomeClass.php'));
+        $this->assertFalse($config->isPathAllowed('src/Excluded.php'));
+    }
 }
 

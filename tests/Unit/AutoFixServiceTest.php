@@ -155,5 +155,79 @@ final class AutoFixServiceTest extends TestCase
         $this->assertSame(50, $strategies[1]->getPriority());
         $this->assertSame(50, $strategies[2]->getPriority());
     }
+
+    public function testGroupIssuesByFileFiltersByIncludePaths(): void
+    {
+        $configuration = new \PhpstanFixer\Configuration\Configuration(
+            [],
+            new \PhpstanFixer\Configuration\Rule('fix'),
+            [],
+            [],
+            [],
+            ['src/']
+        );
+        $service = new AutoFixService([], $configuration);
+
+        $issues = [
+            new Issue('src/SomeClass.php', 10, 'Error 1'),
+            new Issue('tests/SomeTest.php', 20, 'Error 2'),
+        ];
+
+        $grouped = $service->groupIssuesByFile($issues);
+
+        // Only src/ file should be included
+        $this->assertArrayHasKey('src/SomeClass.php', $grouped);
+        $this->assertArrayNotHasKey('tests/SomeTest.php', $grouped);
+    }
+
+    public function testGroupIssuesByFileFiltersByExcludePaths(): void
+    {
+        $configuration = new \PhpstanFixer\Configuration\Configuration(
+            [],
+            new \PhpstanFixer\Configuration\Rule('fix'),
+            [],
+            [],
+            [],
+            [],
+            ['tests/']
+        );
+        $service = new AutoFixService([], $configuration);
+
+        $issues = [
+            new Issue('src/SomeClass.php', 10, 'Error 1'),
+            new Issue('tests/SomeTest.php', 20, 'Error 2'),
+        ];
+
+        $grouped = $service->groupIssuesByFile($issues);
+
+        // tests/ file should be excluded
+        $this->assertArrayHasKey('src/SomeClass.php', $grouped);
+        $this->assertArrayNotHasKey('tests/SomeTest.php', $grouped);
+    }
+
+    public function testGroupIssuesByFileFiltersByGlobPatterns(): void
+    {
+        $configuration = new \PhpstanFixer\Configuration\Configuration(
+            [],
+            new \PhpstanFixer\Configuration\Rule('fix'),
+            [],
+            [],
+            [],
+            [],
+            ['**/*Test.php']
+        );
+        $service = new AutoFixService([], $configuration);
+
+        $issues = [
+            new Issue('src/SomeClass.php', 10, 'Error 1'),
+            new Issue('src/SomeTest.php', 20, 'Error 2'),
+        ];
+
+        $grouped = $service->groupIssuesByFile($issues);
+
+        // Test files should be excluded
+        $this->assertArrayHasKey('src/SomeClass.php', $grouped);
+        $this->assertArrayNotHasKey('src/SomeTest.php', $grouped);
+    }
 }
 
