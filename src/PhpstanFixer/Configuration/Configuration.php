@@ -24,13 +24,17 @@ final class Configuration
      * @param array<string> $enabledFixers List of enabled fixer names (empty = all enabled)
      * @param array<string> $disabledFixers List of disabled fixer names
      * @param array<string, int> $fixerPriorities Map of fixer names to priorities
+     * @param array<string> $includePaths List of paths/patterns to include
+     * @param array<string> $excludePaths List of paths/patterns to exclude
      */
     public function __construct(
         private readonly array $rules = [],
         private readonly Rule $default = new Rule('fix'),
         private readonly array $enabledFixers = [],
         private readonly array $disabledFixers = [],
-        private readonly array $fixerPriorities = []
+        private readonly array $fixerPriorities = [],
+        private readonly array $includePaths = [],
+        private readonly array $excludePaths = []
     ) {
     }
 
@@ -165,6 +169,52 @@ final class Configuration
 
         // Otherwise, only fixers in enabled list are enabled
         return in_array($fixerName, $this->enabledFixers, true);
+    }
+
+    /**
+     * Get list of include paths/patterns.
+     *
+     * @return array<string>
+     */
+    public function getIncludePaths(): array
+    {
+        return $this->includePaths;
+    }
+
+    /**
+     * Get list of exclude paths/patterns.
+     *
+     * @return array<string>
+     */
+    public function getExcludePaths(): array
+    {
+        return $this->excludePaths;
+    }
+
+    /**
+     * Check if a file path is allowed based on include/exclude patterns.
+     * Logic:
+     * - If exclude patterns match → false
+     * - If include patterns are empty → true (all allowed)
+     * - If include patterns are not empty → true only if matches include pattern
+     *
+     * @param string $filePath The file path to check
+     * @return bool True if path is allowed
+     */
+    public function isPathAllowed(string $filePath): bool
+    {
+        // Exclude patterns take precedence
+        if (!empty($this->excludePaths) && PathFilter::matchesAny($filePath, $this->excludePaths)) {
+            return false;
+        }
+
+        // If no include patterns, all paths are allowed
+        if (empty($this->includePaths)) {
+            return true;
+        }
+
+        // Otherwise, path must match at least one include pattern
+        return PathFilter::matchesAny($filePath, $this->includePaths);
     }
 }
 

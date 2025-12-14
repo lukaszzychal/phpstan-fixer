@@ -437,6 +437,93 @@ JSON;
         $this->loader->loadFromFile($filePath);
     }
 
+    public function testLoadFromJsonFileWithIncludeExcludePaths(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "include_paths": ["src/", "app/"],
+  "exclude_paths": ["vendor/", "tests/", "**/*Test.php"]
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $config = $this->loader->loadFromFile($filePath);
+
+        $this->assertInstanceOf(Configuration::class, $config);
+        $includePaths = $config->getIncludePaths();
+        $this->assertCount(2, $includePaths);
+        $this->assertContains('src/', $includePaths);
+        $this->assertContains('app/', $includePaths);
+
+        $excludePaths = $config->getExcludePaths();
+        $this->assertCount(3, $excludePaths);
+        $this->assertContains('vendor/', $excludePaths);
+        $this->assertContains('tests/', $excludePaths);
+        $this->assertContains('**/*Test.php', $excludePaths);
+    }
+
+    public function testLoadFromYamlFileWithIncludeExcludePaths(): void
+    {
+        if (!function_exists('yaml_parse') && !class_exists(\Symfony\Component\Yaml\Yaml::class)) {
+            $this->markTestSkipped('YAML extension or Symfony YAML is not available');
+            return;
+        }
+
+        $yamlContent = <<<'YAML'
+include_paths:
+  - src/
+  - app/
+exclude_paths:
+  - vendor/
+  - "**/*Test.php"
+YAML;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.yaml';
+        file_put_contents($filePath, $yamlContent);
+
+        $config = $this->loader->loadFromFile($filePath);
+
+        $this->assertInstanceOf(Configuration::class, $config);
+        $this->assertCount(2, $config->getIncludePaths());
+        $this->assertCount(2, $config->getExcludePaths());
+    }
+
+    public function testThrowsWhenIncludePathsIsNotArray(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "include_paths": "not-an-array"
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Configuration "include_paths" must be an array');
+
+        $this->loader->loadFromFile($filePath);
+    }
+
+    public function testThrowsWhenExcludePathsIsNotArray(): void
+    {
+        $jsonContent = <<<'JSON'
+{
+  "exclude_paths": "not-an-array"
+}
+JSON;
+
+        $filePath = $this->tempDir . '/phpstan-fixer.json';
+        file_put_contents($filePath, $jsonContent);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Configuration "exclude_paths" must be an array');
+
+        $this->loader->loadFromFile($filePath);
+    }
+
     private function removeDirectory(string $dir): void
     {
         if (!is_dir($dir)) {

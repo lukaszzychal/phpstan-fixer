@@ -152,6 +152,7 @@ final class AutoFixService
 
     /**
      * Get all issues grouped by file path.
+     * Filters issues based on include/exclude paths from configuration.
      *
      * @param Issue[] $issues Array of issues
      * @return array<string, Issue[]> Issues grouped by file path
@@ -162,6 +163,12 @@ final class AutoFixService
 
         foreach ($issues as $issue) {
             $filePath = $issue->getFilePath();
+
+            // Filter by include/exclude paths if configuration is provided
+            if ($this->configuration !== null && !$this->configuration->isPathAllowed($filePath)) {
+                continue;
+            }
+
             if (!isset($grouped[$filePath])) {
                 $grouped[$filePath] = [];
             }

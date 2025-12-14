@@ -194,12 +194,32 @@ final class ConfigurationLoader
         // Parse fixers section
         [$enabledFixers, $disabledFixers, $fixerPriorities] = $this->parseFixersSection($data);
 
+        // Parse include_paths
+        $includePaths = [];
+        if (isset($data['include_paths'])) {
+            if (!is_array($data['include_paths'])) {
+                throw new \RuntimeException('Configuration "include_paths" must be an array.');
+            }
+            $includePaths = $this->extractStringArray($data['include_paths'], 'include_paths');
+        }
+
+        // Parse exclude_paths
+        $excludePaths = [];
+        if (isset($data['exclude_paths'])) {
+            if (!is_array($data['exclude_paths'])) {
+                throw new \RuntimeException('Configuration "exclude_paths" must be an array.');
+            }
+            $excludePaths = $this->extractStringArray($data['exclude_paths'], 'exclude_paths');
+        }
+
         return new Configuration(
             $rules,
             $this->createRule('default', $defaultAction),
             $enabledFixers,
             $disabledFixers,
-            $fixerPriorities
+            $fixerPriorities,
+            $includePaths,
+            $excludePaths
         );
     }
 
