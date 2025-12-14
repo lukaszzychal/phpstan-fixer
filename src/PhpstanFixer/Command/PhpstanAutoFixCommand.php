@@ -129,8 +129,9 @@ final class PhpstanAutoFixCommand extends Command
         }
 
         // Parse issues
+        // If inputPath is provided, parser expects the path; otherwise it expects JSON content
         try {
-            $issues = $parser->parse($jsonContent, $inputPath !== null);
+            $issues = $parser->parse($inputPath ?? $jsonContent, $inputPath !== null);
         } catch (\Exception $e) {
             $io->error('Failed to parse PHPStan JSON: ' . $e->getMessage());
             return Command::FAILURE;
