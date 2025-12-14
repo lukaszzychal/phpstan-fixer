@@ -19,6 +19,7 @@ use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
 use PhpstanFixer\Strategy\TypeFormatterTrait;
 use PhpstanFixer\Strategy\FileValidationTrait;
+use PhpstanFixer\Strategy\FunctionLocatorTrait;
 
 /**
  * Fixes missing parameter type annotations by adding @param mixed.
@@ -30,6 +31,7 @@ final class MissingParamDocblockFixer implements FixStrategyInterface
     use PriorityTrait;
     use TypeFormatterTrait;
     use FileValidationTrait;
+    use FunctionLocatorTrait;
     private TypeInference $typeInference;
 
     public function __construct(
