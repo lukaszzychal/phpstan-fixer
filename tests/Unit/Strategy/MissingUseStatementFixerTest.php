@@ -76,5 +76,73 @@ PHP;
     {
         $this->assertSame('MissingUseStatementFixer', $this->fixer->getName());
     }
+
+    public function testDiscoversFqnFromVendorDirectory(): void
+    {
+        $root = sys_get_temp_dir() . '/phpstan-fixer-' . uniqid();
+        $srcDir = $root . '/src/App';
+        $vendorDir = $root . '/vendor/Acme/Util';
+
+        mkdir($srcDir, 0777, true);
+        mkdir($vendorDir, 0777, true);
+
+        file_put_contents($root . '/composer.json', '{}');
+
+        $vendorClass = <<<'PHP'
+<?php
+
+namespace Acme\Util;
+
+final class Helper {}
+PHP;
+        file_put_contents($vendorDir . '/Helper.php', $vendorClass);
+
+        $fileContent = <<<'PHP'
+<?php
+
+namespace App;
+
+final class Main {
+    public function run(): void {
+        new Helper();
+    }
+}
+PHP;
+        $filePath = $srcDir . '/Main.php';
+        file_put_contents($filePath, $fileContent);
+
+        try {
+            $issue = new Issue($filePath, 6, 'Class Helper not found');
+
+            $result = $this->fixer->fix($issue, $fileContent);
+
+            $this->assertTrue($result->isSuccessful());
+            $this->assertStringContainsString('use Acme\\Util\\Helper;', $result->getFixedContent());
+        } finally {
+            $this->removeDirectory($root);
+        }
+    }
+
+    private function removeDirectory(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+
+        $items = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($items as $item) {
+            if ($item->isDir()) {
+                rmdir($item->getPathname());
+            } else {
+                unlink($item->getPathname());
+            }
+        }
+
+        rmdir($dir);
+    }
 }
 
