@@ -1,5 +1,7 @@
 # Wytyczne Dokumentacji Dwujęzycznej (Bilingual Documentation Guidelines)
 
+> 🇵🇱 **Polish version**: [Wytyczne Dokumentacji Dwujęzycznej (PL)](BILINGUAL_DOCUMENTATION_GUIDELINES_PL.md)
+
 ## Wprowadzenie
 
 Projekt `phpstan-fixer` wspiera dokumentację w dwóch językach:
