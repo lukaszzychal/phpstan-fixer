@@ -306,6 +306,8 @@ final class ConfigurationLoader
     {
         $priorities = [];
         foreach ($data as $fixerName => $priority) {
+            // PHPStan knows keys are strings from array<string, mixed> type, but we keep this check for runtime safety
+            /** @phpstan-ignore-next-line */
             if (!is_string($fixerName)) {
                 throw new \RuntimeException(sprintf(
                     'Configuration "fixers.priorities" keys must be strings, got %s',

@@ -643,8 +643,8 @@ final class PhpstanAutoFixCommand extends Command
      * @param array{type: string, oldIndex: int, newIndex: int} $op
      * @param string[] $originalLines
      * @param string[] $fixedLines
-     * @param int[] $changeOldIndices
-     * @param int[] $changeNewIndices
+     * @param array<int> $changeOldIndices
+     * @param array<int> $changeNewIndices
      */
     private function addChangeIndicesForOperation(
         array $op,
