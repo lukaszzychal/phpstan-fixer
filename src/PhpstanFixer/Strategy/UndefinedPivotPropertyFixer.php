@@ -145,5 +145,10 @@ final class UndefinedPivotPropertyFixer implements FixStrategyInterface
     {
         return 'UndefinedPivotPropertyFixer';
     }
+
+    public function getSupportedFrameworks(): array
+    {
+        return ['laravel'];
+    }
 }
 
