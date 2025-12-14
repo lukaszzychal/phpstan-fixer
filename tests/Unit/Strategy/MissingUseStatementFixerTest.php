@@ -38,6 +38,41 @@ final class MissingUseStatementFixerTest extends TestCase
         $this->assertTrue($this->fixer->canFix($issue));
     }
 
+    public function testCanFixUnknownClass(): void
+    {
+        $issue = new Issue('/path/to/file.php', 10, 'Unknown class Foo');
+        
+        $this->assertTrue($this->fixer->canFix($issue));
+    }
+
+    public function testCanFixClassIsUndefined(): void
+    {
+        $issue = new Issue('/path/to/file.php', 10, 'Class Foo is undefined');
+        
+        $this->assertTrue($this->fixer->canFix($issue));
+    }
+
+    public function testCanFixInstantiatedClassNotFound(): void
+    {
+        $issue = new Issue('/path/to/file.php', 10, 'Instantiated class Foo not found');
+        
+        $this->assertTrue($this->fixer->canFix($issue));
+    }
+
+    public function testCanFixReferencedClassNotFound(): void
+    {
+        $issue = new Issue('/path/to/file.php', 10, 'Referenced class Foo not found');
+        
+        $this->assertTrue($this->fixer->canFix($issue));
+    }
+
+    public function testCanFixCannotResolveSymbol(): void
+    {
+        $issue = new Issue('/path/to/file.php', 10, 'Cannot resolve symbol Foo');
+        
+        $this->assertTrue($this->fixer->canFix($issue));
+    }
+
     public function testAddsUseForFullyQualifiedClass(): void
     {
         $tempFile = sys_get_temp_dir() . '/missing-use-' . uniqid() . '.php';
@@ -75,6 +110,74 @@ PHP;
     public function testGetName(): void
     {
         $this->assertSame('MissingUseStatementFixer', $this->fixer->getName());
+    }
+
+    public function testExtractsClassNameFromUnknownClassMessage(): void
+    {
+        $tempFile = sys_get_temp_dir() . '/missing-use-' . uniqid() . '.php';
+        $fileContent = <<<'PHP'
+<?php
+
+namespace App;
+
+class Demo {
+    public function run(): void {
+        new Bar();
+    }
+}
+PHP;
+        file_put_contents($tempFile, $fileContent);
+
+        try {
+            $issue = new Issue(
+                $tempFile,
+                6,
+                'Unknown class \\Vendor\\Package\\Bar'
+            );
+
+            $result = $this->fixer->fix($issue, $fileContent);
+
+            $this->assertTrue($result->isSuccessful());
+            $this->assertStringContainsString('use Vendor\\Package\\Bar;', $result->getFixedContent());
+        } finally {
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+        }
+    }
+
+    public function testExtractsClassNameFromCannotResolveSymbolMessage(): void
+    {
+        $tempFile = sys_get_temp_dir() . '/missing-use-' . uniqid() . '.php';
+        $fileContent = <<<'PHP'
+<?php
+
+namespace App;
+
+class Demo {
+    public function run(): void {
+        new Bar();
+    }
+}
+PHP;
+        file_put_contents($tempFile, $fileContent);
+
+        try {
+            $issue = new Issue(
+                $tempFile,
+                6,
+                'Cannot resolve symbol \\Vendor\\Package\\Bar'
+            );
+
+            $result = $this->fixer->fix($issue, $fileContent);
+
+            $this->assertTrue($result->isSuccessful());
+            $this->assertStringContainsString('use Vendor\\Package\\Bar;', $result->getFixedContent());
+        } finally {
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+        }
     }
 
     public function testDiscoversFqnFromVendorDirectory(): void

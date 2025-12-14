@@ -59,6 +59,11 @@
             "phpstan/extension-installer": true
         }
     },
+    "extra": {
+        "laravel": {
+            "dont-discover": true
+        }
+    },
     "minimum-stability": "stable",
     "prefer-stable": true
 }
