@@ -22,7 +22,7 @@ final class FrameworkDetector
      * Detect framework in the given directory.
      *
      * @param string $projectRoot Path to project root directory
-     * @return string|null Framework name ('laravel', 'symfony') or null if not detected
+     * @return string|null Framework name ('laravel', 'symfony', 'codeigniter', 'cakephp', 'yii', 'laminas', 'phalcon') or null if not detected
      */
     public function detect(string $projectRoot): ?string
     {
@@ -87,6 +87,31 @@ final class FrameworkDetector
         // Lower threshold to 2 for better detection (common Symfony apps have at least 2-3 components)
         if (count($symfonyPackages) >= 2) {
             return 'symfony';
+        }
+
+        // Check for CodeIgniter
+        if (isset($require['codeigniter4/framework'])) {
+            return 'codeigniter';
+        }
+
+        // Check for CakePHP
+        if (isset($require['cakephp/cakephp'])) {
+            return 'cakephp';
+        }
+
+        // Check for Yii
+        if (isset($require['yiisoft/yii']) || isset($require['yiisoft/yii2'])) {
+            return 'yii';
+        }
+
+        // Check for Laminas (formerly Zend Framework)
+        if (isset($require['laminas/laminas-mvc']) || isset($require['laminas/laminas-mvc-skeleton'])) {
+            return 'laminas';
+        }
+
+        // Check for Phalcon
+        if (isset($require['phalcon/cphalcon'])) {
+            return 'phalcon';
         }
 
         return null;
