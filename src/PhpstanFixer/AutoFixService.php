@@ -182,20 +182,32 @@ final class AutoFixService
      * Fix all issues across multiple files.
      *
      * @param Issue[] $issues Array of issues (can be from multiple files)
+     * @param callable(int $processed, int $total, string $currentFile): void|null $progressCallback Optional progress callback
      * @return array<string, array<string, mixed>> Results grouped by file path
      */
-    public function fixAllIssues(array $issues): array
+    public function fixAllIssues(array $issues, ?callable $progressCallback = null): array
     {
         $groupedIssues = $this->groupIssuesByFile($issues);
         $results = [];
-
+        
+        // Filter to only processable files and count them for accurate progress reporting
+        // This ensures progress callback reports correct totals even when files are skipped
+        $processableFiles = [];
         foreach ($groupedIssues as $filePath => $fileIssues) {
-            if (!file_exists($filePath)) {
-                continue;
+            if (file_exists($filePath)) {
+                $processableFiles[$filePath] = $fileIssues;
             }
+        }
+        
+        $totalFiles = count($processableFiles);
+        $processedFiles = 0;
 
+        foreach ($processableFiles as $filePath => $fileIssues) {
             $fileContent = file_get_contents($filePath);
             if ($fileContent === false) {
+                // Skip files that can't be read (even though they exist)
+                // This shouldn't happen often, but handle it gracefully
+                $totalFiles--;
                 continue;
             }
 
@@ -243,6 +255,12 @@ final class AutoFixService
                 'reportedIssues' => $reportedIssues,
                 'ignoredIssues' => $ignoredIssues,
             ];
+
+            // Call progress callback if provided
+            $processedFiles++;
+            if ($progressCallback !== null) {
+                $progressCallback($processedFiles, $totalFiles, $filePath);
+            }
         }
 
         return $results;
