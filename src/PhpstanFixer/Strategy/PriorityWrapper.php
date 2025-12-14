@@ -52,5 +52,10 @@ final class PriorityWrapper implements FixStrategyInterface
     {
         return $this->priority;
     }
+
+    public function getSupportedFrameworks(): array
+    {
+        return $this->strategy->getSupportedFrameworks();
+    }
 }
 

@@ -51,5 +51,13 @@ interface FixStrategyInterface
      * Default priority is 0.
      */
     public function getPriority(): int;
+
+    /**
+     * Get list of frameworks this fixer is specific to.
+     * Returns empty array if fixer is framework-agnostic.
+     *
+     * @return array<string> Array of framework names (e.g., ['laravel', 'symfony'])
+     */
+    public function getSupportedFrameworks(): array;
 }
 

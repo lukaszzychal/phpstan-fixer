@@ -14,6 +14,7 @@ namespace PhpstanFixer\Command;
 use PhpstanFixer\AutoFixService;
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
+use PhpstanFixer\Framework\FrameworkDetector;
 use PhpstanFixer\Configuration\Configuration;
 use PhpstanFixer\Configuration\ConfigurationLoader;
 use PhpstanFixer\FixResult;
@@ -115,8 +116,14 @@ final class PhpstanAutoFixCommand extends Command
         // Load configuration if specified or found
         $configuration = $this->loadConfiguration($input->getOption('config'), $io);
         
+        // Detect framework and inform user
+        $framework = $this->detectFramework($io);
+        if ($framework !== null) {
+            $io->note("Detected framework: {$framework}");
+        }
+        
         try {
-            $autoFixService = $this->autoFixService ?? $this->createDefaultAutoFixService($configuration);
+            $autoFixService = $this->autoFixService ?? $this->createDefaultAutoFixService($configuration, $framework);
         } catch (\RuntimeException $e) {
             $io->error($e->getMessage());
             return Command::FAILURE;
@@ -366,8 +373,11 @@ final class PhpstanAutoFixCommand extends Command
 
     /**
      * Create default AutoFixService with all strategies.
+     *
+     * @param Configuration|null $configuration Configuration object
+     * @param string|null $framework Detected framework name ('laravel', 'symfony', etc.) or null
      */
-    private function createDefaultAutoFixService(?Configuration $configuration = null): AutoFixService
+    private function createDefaultAutoFixService(?Configuration $configuration = null, ?string $framework = null): AutoFixService
     {
         $analyzer = new PhpFileAnalyzer();
         $docblockManipulator = new DocblockManipulator();
@@ -406,6 +416,9 @@ final class PhpstanAutoFixCommand extends Command
 
         // Filter strategies based on configuration
         $strategies = $this->filterStrategies($allStrategies, $configuration);
+        
+        // Filter framework-specific fixers based on detected framework
+        $strategies = $this->filterFrameworkSpecificFixers($strategies, $framework);
 
         // Apply priorities from configuration
         $strategies = $this->applyFixerPriorities($strategies, $configuration);
@@ -509,6 +522,48 @@ final class PhpstanAutoFixCommand extends Command
         return array_filter($strategies, function ($strategy) use ($configuration): bool {
             return $configuration->isFixerEnabled($strategy->getName());
         });
+    }
+
+    /**
+     * Filter framework-specific fixers based on detected framework.
+     * Framework-agnostic fixers are always included.
+     * Framework-specific fixers are included only if their framework matches the detected one.
+     *
+     * @param array<FixStrategyInterface> $strategies Strategies to filter
+     * @param string|null $framework Detected framework name or null
+     * @return array<FixStrategyInterface> Filtered strategies
+     */
+    private function filterFrameworkSpecificFixers(array $strategies, ?string $framework): array
+    {
+        if ($framework === null) {
+            // If no framework detected, exclude all framework-specific fixers
+            return array_filter($strategies, function ($strategy): bool {
+                return empty($strategy->getSupportedFrameworks());
+            });
+        }
+
+        // Include framework-agnostic fixers and fixers that support the detected framework
+        return array_filter($strategies, function ($strategy) use ($framework): bool {
+            $supportedFrameworks = $strategy->getSupportedFrameworks();
+            return empty($supportedFrameworks) || in_array($framework, $supportedFrameworks, true);
+        });
+    }
+
+    /**
+     * Detect framework in the current project.
+     *
+     * @param \Symfony\Component\Console\Style\StyleInterface $io I/O interface for messages
+     * @return string|null Framework name or null if not detected
+     */
+    private function detectFramework($io): ?string
+    {
+        $projectRoot = getcwd();
+        if ($projectRoot === false) {
+            return null;
+        }
+
+        $detector = new FrameworkDetector();
+        return $detector->detect($projectRoot);
     }
 
     /**

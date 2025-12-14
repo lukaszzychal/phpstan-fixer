@@ -13,6 +13,7 @@ namespace PhpstanFixer\Strategy;
 
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
+use PhpstanFixer\CodeAnalysis\TypeInference;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
@@ -25,10 +26,13 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class MissingParamDocblockFixer implements FixStrategyInterface
 {
     use PriorityTrait;
+    private TypeInference $typeInference;
+
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator
     ) {
+        $this->typeInference = new TypeInference($analyzer);
     }
 
     public function canFix(Issue $issue): bool
@@ -107,7 +111,10 @@ final class MissingParamDocblockFixer implements FixStrategyInterface
             // Determine type from native type hint if available
             $paramType = $this->getParameterType($targetNode, $paramInfo['position']);
             if ($paramType === null) {
-                $paramType = 'mixed';
+                // Try to infer type from usage
+                $ast = $this->analyzer->parse($fileContent);
+                $inferredType = $this->typeInference->inferParameterType($targetNode, $paramInfo['position'], $ast);
+                $paramType = $inferredType ?? 'mixed';
             }
 
             // Add @param to existing docblock
@@ -127,7 +134,13 @@ final class MissingParamDocblockFixer implements FixStrategyInterface
             );
         } else {
             // Create new docblock
-            $paramType = $this->getParameterType($targetNode, $paramInfo['position']) ?? 'mixed';
+            $paramType = $this->getParameterType($targetNode, $paramInfo['position']);
+            if ($paramType === null) {
+                // Try to infer type from usage
+                $ast = $this->analyzer->parse($fileContent);
+                $inferredType = $this->typeInference->inferParameterType($targetNode, $paramInfo['position'], $ast);
+                $paramType = $inferredType ?? 'mixed';
+            }
             $docblock = "/**\n * @param {$paramType} {$paramName}\n */";
             $docblockLines = explode("\n", $docblock);
             array_splice($lines, $nodeIndex, 0, $docblockLines);

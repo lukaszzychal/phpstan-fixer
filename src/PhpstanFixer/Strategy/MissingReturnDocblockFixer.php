@@ -13,6 +13,7 @@ namespace PhpstanFixer\Strategy;
 
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
+use PhpstanFixer\CodeAnalysis\TypeInference;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
@@ -25,10 +26,13 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class MissingReturnDocblockFixer implements FixStrategyInterface
 {
     use PriorityTrait;
+    private TypeInference $typeInference;
+
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator
     ) {
+        $this->typeInference = new TypeInference($analyzer);
     }
 
     public function canFix(Issue $issue): bool
@@ -105,11 +109,19 @@ final class MissingReturnDocblockFixer implements FixStrategyInterface
         }
 
         // Determine return type from native type hint if available
-        $returnType = 'mixed';
+        $returnType = null;
         if ($targetFunction !== null && $targetFunction->getReturnType() !== null) {
             $returnType = $this->formatType($targetFunction->getReturnType());
         } elseif ($targetMethod !== null && $targetMethod->getReturnType() !== null) {
             $returnType = $this->formatType($targetMethod->getReturnType());
+        }
+
+        // If no type hint, try to infer from return statements
+        if ($returnType === null) {
+            $ast = $this->analyzer->parse($fileContent);
+            $targetNode = $targetFunction ?? $targetMethod;
+            $inferredType = $this->typeInference->inferReturnType($targetNode, $ast);
+            $returnType = $inferredType ?? 'mixed';
         }
 
         // Add or create docblock with @return

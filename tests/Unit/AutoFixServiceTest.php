@@ -78,6 +78,7 @@ final class AutoFixServiceTest extends TestCase
             public function getDescription(): string { return ''; }
             public function getName(): string { return 'HighPriorityFixer'; }
             public function getPriority(): int { return 100; }
+            public function getSupportedFrameworks(): array { return []; }
         };
 
         $lowPriorityFixer = new class implements \PhpstanFixer\Strategy\FixStrategyInterface {
@@ -88,6 +89,7 @@ final class AutoFixServiceTest extends TestCase
             public function getDescription(): string { return ''; }
             public function getName(): string { return 'LowPriorityFixer'; }
             public function getPriority(): int { return 0; }
+            public function getSupportedFrameworks(): array { return []; }
         };
 
         // Add low priority first, then high priority
@@ -114,6 +116,7 @@ final class AutoFixServiceTest extends TestCase
             public function getDescription(): string { return ''; }
             public function getName(): string { return 'FixerA'; }
             public function getPriority(): int { return 50; }
+            public function getSupportedFrameworks(): array { return []; }
         };
 
         $fixerB = new class implements \PhpstanFixer\Strategy\FixStrategyInterface {
@@ -124,6 +127,7 @@ final class AutoFixServiceTest extends TestCase
             public function getDescription(): string { return ''; }
             public function getName(): string { return 'FixerB'; }
             public function getPriority(): int { return 50; }
+            public function getSupportedFrameworks(): array { return []; }
         };
 
         $fixerC = new class implements \PhpstanFixer\Strategy\FixStrategyInterface {
@@ -134,6 +138,7 @@ final class AutoFixServiceTest extends TestCase
             public function getDescription(): string { return ''; }
             public function getName(): string { return 'FixerC'; }
             public function getPriority(): int { return 50; }
+            public function getSupportedFrameworks(): array { return []; }
         };
 
         // All have same priority - insertion order should be preserved

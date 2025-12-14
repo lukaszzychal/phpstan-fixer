@@ -58,6 +58,11 @@ final class TestCustomFixer implements FixStrategyInterface
     {
         return 0;
     }
+
+    public function getSupportedFrameworks(): array
+    {
+        return [];
+    }
 }
 
 /**

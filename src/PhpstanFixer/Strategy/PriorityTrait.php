@@ -12,7 +12,7 @@ declare(strict_types=1);
 namespace PhpstanFixer\Strategy;
 
 /**
- * Trait providing default priority implementation for fixers.
+ * Trait providing default priority and framework support implementation for fixers.
  *
  * @author Łukasz Zychal <lukasz.zychal.dev@gmail.com>
  */
@@ -25,6 +25,17 @@ trait PriorityTrait
     public function getPriority(): int
     {
         return 0;
+    }
+
+    /**
+     * Get list of frameworks this fixer is specific to.
+     * Default implementation returns empty array (framework-agnostic).
+     *
+     * @return array<string>
+     */
+    public function getSupportedFrameworks(): array
+    {
+        return [];
     }
 }
 
