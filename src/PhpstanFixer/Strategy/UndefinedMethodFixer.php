@@ -16,6 +16,7 @@ use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
+use PhpstanFixer\Strategy\FileValidationTrait;
 
 /**
  * Fixes undefined method errors by adding @method annotation.
@@ -25,7 +26,8 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class UndefinedMethodFixer implements FixStrategyInterface
 {
     use PriorityTrait;
-    
+    use FileValidationTrait;
+
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator

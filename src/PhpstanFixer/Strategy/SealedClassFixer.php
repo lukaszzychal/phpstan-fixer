@@ -16,6 +16,7 @@ use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
+use PhpstanFixer\Strategy\FileValidationTrait;
 
 /**
  * Adds @phpstan-sealed Class1|Class2 when a class extends a sealed class.
