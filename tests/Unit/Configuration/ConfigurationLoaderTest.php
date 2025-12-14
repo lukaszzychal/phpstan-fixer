@@ -114,6 +114,7 @@ JSON;
         // Skip test if yaml extension is available
         if (function_exists('yaml_parse') || class_exists(\Symfony\Component\Yaml\Yaml::class)) {
             $this->markTestSkipped('YAML extension or Symfony YAML is available');
+            /** @phpstan-ignore-next-line - PHPStan doesn't understand that markTestSkipped() may not always throw */
             return;
         }
 
@@ -138,6 +139,7 @@ YAML;
     {
         if (!function_exists('yaml_parse') && !class_exists(\Symfony\Component\Yaml\Yaml::class)) {
             $this->markTestSkipped('YAML extension or Symfony YAML is not available');
+            /** @phpstan-ignore-next-line - PHPStan doesn't understand that markTestSkipped() may not always throw */
             return;
         }
 

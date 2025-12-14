@@ -26,6 +26,7 @@ final class Configuration
      * @param array<string, int> $fixerPriorities Map of fixer names to priorities
      * @param array<string> $includePaths List of paths/patterns to include
      * @param array<string> $excludePaths List of paths/patterns to exclude
+     * @param array<string> $customFixers List of custom fixer class names (FQN)
      */
     public function __construct(
         private readonly array $rules = [],
@@ -34,7 +35,8 @@ final class Configuration
         private readonly array $disabledFixers = [],
         private readonly array $fixerPriorities = [],
         private readonly array $includePaths = [],
-        private readonly array $excludePaths = []
+        private readonly array $excludePaths = [],
+        private readonly array $customFixers = []
     ) {
     }
 
@@ -215,6 +217,16 @@ final class Configuration
 
         // Otherwise, path must match at least one include pattern
         return PathFilter::matchesAny($filePath, $this->includePaths);
+    }
+
+    /**
+     * Get list of custom fixer class names (FQN).
+     *
+     * @return array<string> List of fully qualified class names
+     */
+    public function getCustomFixers(): array
+    {
+        return $this->customFixers;
     }
 }
 
