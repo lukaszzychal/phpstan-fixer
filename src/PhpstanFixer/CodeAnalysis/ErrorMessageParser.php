@@ -21,7 +21,8 @@ final class ErrorMessageParser
 {
     /**
      * Extract parameter name from error message.
-     * Handles patterns like "Parameter $name", "Parameter #1 $name", "parameter 'name'", etc.
+     * Handles patterns like "Parameter $name", "Parameter #1 $name", "parameter 'name'", 
+     * and simple variable references like "Unknown array offset type on $items".
      *
      * @param string $message The error message
      * @return string|null The parameter name (without $) or null if not found
@@ -40,6 +41,12 @@ final class ErrorMessageParser
 
         // Try "parameter 'name'" pattern
         if (preg_match("/parameter\s+['\"](\w+)['\"]/i", $message, $matches)) {
+            return $matches[1];
+        }
+
+        // Try simple variable reference pattern (e.g., "Unknown array offset type on $items")
+        // Look for $variable that appears to be in a parameter context
+        if (preg_match('/\$(\w+)/', $message, $matches)) {
             return $matches[1];
         }
 
