@@ -39,16 +39,27 @@
 
 ### 4. Statystyki Fazy 4
 
-- **Utworzone klasy/ traity**: 2
+- **Utworzone klasy/ traity**: 3
   - `FunctionLocatorTrait`
   - `ErrorMessageParser`
-- **Zmniejszona duplikacja**: ~140 linii kodu (FunctionLocatorTrait) + ~62 linie (ErrorMessageParser) = **~202 linie**
+  - `FixerFactory`
+- **Zmniejszona duplikacja**: ~140 linii kodu (FunctionLocatorTrait) + ~62 linie (ErrorMessageParser) + ~50 linii (FixerFactory) = **~252 linie**
 - **Zastosowanie do fixerów**: 
   - FunctionLocatorTrait: 5 fixerów
   - ErrorMessageParser: 5 fixerów
 - **Wszystkie testy**: ✅ Przechodzą (224 testy, 461 asercji)
 - **PHPStan**: ✅ Brak błędów
-- **Commity**: 6 commitów
+- **Commity**: 7 commitów
+
+### 5. Refaktoryzacja loadCustomFixers()
+
+✅ **FixerFactory** - nowa klasa do tworzenia instancji fixerów:
+- Wyekstrahowana logika refleksji i dependency injection
+- Uproszczona metoda `loadCustomFixers()` (z ~75 linii do ~25 linii)
+- Lepsza organizacja kodu i możliwość testowania
+- Cache'owanie wspólnych zależności (`PhpFileAnalyzer`, `DocblockManipulator`)
+
+**Zmniejszona złożoność**: `loadCustomFixers()` uproszczona o ~50 linii
 
 ## Kolejne kroki (pozostałe zadania Fazy 4)
 
@@ -56,7 +67,7 @@
 - ✅ Zastosować `FunctionLocatorTrait` do fixerów (5/5)
 - ✅ Utworzyć `ErrorMessageParser` helper class
 - ✅ Zastosować `ErrorMessageParser` do fixerów (5/5)
-- ⏳ Refaktoryzacja `loadCustomFixers()`
+- ✅ Refaktoryzacja `loadCustomFixers()` - utworzono `FixerFactory`
 - ⏳ Optymalizacja `DocblockManipulator`
 - ⏳ Sprawdzenie spójności w Configuration/*.php
 - ⏳ Optymalizacja `PhpstanLogParser`
