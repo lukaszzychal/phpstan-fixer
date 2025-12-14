@@ -15,6 +15,7 @@ use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
+use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Adds @immutable annotation to classes reported as immutable with properties assigned outside.
@@ -23,6 +24,7 @@ use PhpstanFixer\Issue;
  */
 final class ImmutableClassFixer implements FixStrategyInterface
 {
+    use PriorityTrait;
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator

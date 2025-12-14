@@ -67,5 +67,41 @@ final class AutoFixServiceTest extends TestCase
         $this->assertSame(1, $stats['issues_fixed']);
         $this->assertSame(2, $stats['issues_failed']);
     }
+
+    public function testStrategiesAreSortedByPriority(): void
+    {
+        $highPriorityFixer = new class implements \PhpstanFixer\Strategy\FixStrategyInterface {
+            public function canFix(\PhpstanFixer\Issue $issue): bool { return false; }
+            public function fix(\PhpstanFixer\Issue $issue, string $fileContent): \PhpstanFixer\FixResult {
+                return \PhpstanFixer\FixResult::failure($issue, $fileContent, '');
+            }
+            public function getDescription(): string { return ''; }
+            public function getName(): string { return 'HighPriorityFixer'; }
+            public function getPriority(): int { return 100; }
+        };
+
+        $lowPriorityFixer = new class implements \PhpstanFixer\Strategy\FixStrategyInterface {
+            public function canFix(\PhpstanFixer\Issue $issue): bool { return false; }
+            public function fix(\PhpstanFixer\Issue $issue, string $fileContent): \PhpstanFixer\FixResult {
+                return \PhpstanFixer\FixResult::failure($issue, $fileContent, '');
+            }
+            public function getDescription(): string { return ''; }
+            public function getName(): string { return 'LowPriorityFixer'; }
+            public function getPriority(): int { return 0; }
+        };
+
+        // Add low priority first, then high priority
+        $service = new AutoFixService([$lowPriorityFixer, $highPriorityFixer]);
+        
+        // Use reflection to check internal order
+        $reflection = new \ReflectionClass($service);
+        $strategiesProperty = $reflection->getProperty('strategies');
+        $strategiesProperty->setAccessible(true);
+        $strategies = $strategiesProperty->getValue($service);
+        
+        // High priority should be first
+        $this->assertSame(100, $strategies[0]->getPriority());
+        $this->assertSame(0, $strategies[1]->getPriority());
+    }
 }
 

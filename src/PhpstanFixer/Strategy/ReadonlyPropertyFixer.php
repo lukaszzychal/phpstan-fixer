@@ -15,6 +15,7 @@ use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
+use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Adds @readonly annotation to properties that should not be reassigned
@@ -24,6 +25,7 @@ use PhpstanFixer\Issue;
  */
 final class ReadonlyPropertyFixer implements FixStrategyInterface
 {
+    use PriorityTrait;
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator

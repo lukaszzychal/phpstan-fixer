@@ -15,6 +15,7 @@ use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
+use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Fixes undefined pivot property errors by adding @property-read annotation.
@@ -24,6 +25,7 @@ use PhpstanFixer\Issue;
  */
 final class UndefinedPivotPropertyFixer implements FixStrategyInterface
 {
+    use PriorityTrait;
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator

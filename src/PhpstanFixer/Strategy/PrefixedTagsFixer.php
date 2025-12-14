@@ -15,6 +15,7 @@ use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
+use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Adds @phpstan-param / @phpstan-return for advanced types (class-string, literal-string, generics).
@@ -23,6 +24,7 @@ use PhpstanFixer\Issue;
  */
 final class PrefixedTagsFixer implements FixStrategyInterface
 {
+    use PriorityTrait;
     private const ADVANCED_TYPE_PATTERN = '/class-string|literal-string|non-empty-string|numeric-string|callable-string|trait-string|array-key|value-of|key-of|list<|array<|array\{|int<|string<|positive-int|negative-int|non-falsy-string|truthy-string/i';
 
     public function __construct(

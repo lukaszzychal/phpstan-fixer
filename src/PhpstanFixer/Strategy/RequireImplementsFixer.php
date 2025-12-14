@@ -17,6 +17,7 @@ use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\NodeFinder;
+use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Adds @phpstan-require-implements InterfaceName to traits requiring specific interface implementation.
@@ -25,6 +26,7 @@ use PhpParser\NodeFinder;
  */
 final class RequireImplementsFixer implements FixStrategyInterface
 {
+    use PriorityTrait;
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator

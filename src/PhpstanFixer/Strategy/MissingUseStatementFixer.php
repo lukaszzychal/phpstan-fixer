@@ -14,6 +14,7 @@ namespace PhpstanFixer\Strategy;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
+use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Fixes missing use statements by adding them after namespace declaration.
@@ -22,6 +23,8 @@ use PhpstanFixer\Issue;
  */
 final class MissingUseStatementFixer implements FixStrategyInterface
 {
+    use PriorityTrait;
+    
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer
     ) {

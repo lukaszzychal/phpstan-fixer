@@ -45,5 +45,11 @@ interface FixStrategyInterface
      * Get the name/identifier of this fixer strategy.
      */
     public function getName(): string;
+
+    /**
+     * Get the priority of this fixer (higher = executed earlier).
+     * Default priority is 0.
+     */
+    public function getPriority(): int;
 }
 

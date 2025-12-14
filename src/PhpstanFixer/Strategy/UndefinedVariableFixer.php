@@ -13,6 +13,7 @@ namespace PhpstanFixer\Strategy;
 
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
+use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Fixes undefined variable errors by adding inline @var annotation.
@@ -21,6 +22,8 @@ use PhpstanFixer\Issue;
  */
 final class UndefinedVariableFixer implements FixStrategyInterface
 {
+    use PriorityTrait;
+    
     public function __construct()
     {
     }

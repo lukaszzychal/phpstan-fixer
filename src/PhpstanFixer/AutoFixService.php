@@ -29,6 +29,8 @@ final class AutoFixService
         private array $strategies = [],
         private readonly ?Configuration $configuration = null
     ) {
+        // Sort strategies by priority (higher priority = executed first)
+        $this->sortStrategiesByPriority();
     }
 
     /**
@@ -37,6 +39,17 @@ final class AutoFixService
     public function addStrategy(FixStrategyInterface $strategy): void
     {
         $this->strategies[] = $strategy;
+        $this->sortStrategiesByPriority();
+    }
+
+    /**
+     * Sort strategies by priority (higher priority = executed first).
+     */
+    private function sortStrategiesByPriority(): void
+    {
+        usort($this->strategies, function (FixStrategyInterface $a, FixStrategyInterface $b): int {
+            return $b->getPriority() <=> $a->getPriority();
+        });
     }
 
     /**

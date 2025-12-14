@@ -15,6 +15,7 @@ use PhpstanFixer\CodeAnalysis\DocblockManipulator;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
+use PhpstanFixer\Strategy\PriorityTrait;
 
 /**
  * Adds @phpstan-impure or @phpstan-pure to functions/methods based on PHPStan purity diagnostics.
@@ -23,6 +24,7 @@ use PhpstanFixer\Issue;
  */
 final class ImpureFunctionFixer implements FixStrategyInterface
 {
+    use PriorityTrait;
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator
