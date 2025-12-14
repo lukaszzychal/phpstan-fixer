@@ -17,6 +17,8 @@ use PhpstanFixer\CodeAnalysis\TypeInference;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
+use PhpstanFixer\Strategy\TypeFormatterTrait;
+use PhpstanFixer\Strategy\FileValidationTrait;
 
 /**
  * Fixes missing parameter type annotations by adding @param mixed.
@@ -26,6 +28,8 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class MissingParamDocblockFixer implements FixStrategyInterface
 {
     use PriorityTrait;
+    use TypeFormatterTrait;
+    use FileValidationTrait;
     private TypeInference $typeInference;
 
     public function __construct(
@@ -42,14 +46,12 @@ final class MissingParamDocblockFixer implements FixStrategyInterface
 
     public function fix(Issue $issue, string $fileContent): FixResult
     {
-        if (!file_exists($issue->getFilePath())) {
-            return FixResult::failure($issue, $fileContent, 'File does not exist');
+        $validation = $this->validateFileAndParse($issue, $fileContent, $this->analyzer);
+        if ($validation instanceof FixResult) {
+            return $validation;
         }
 
-        $ast = $this->analyzer->parse($fileContent);
-        if ($ast === null) {
-            return FixResult::failure($issue, $fileContent, 'Could not parse file');
-        }
+        $ast = $validation['ast'];
 
         // Extract parameter information from error message
         $paramInfo = $this->extractParameterInfo($issue->getMessage());
@@ -213,34 +215,6 @@ final class MissingParamDocblockFixer implements FixStrategyInterface
         }
 
         return $this->formatType($param->type);
-    }
-
-    /**
-     * Format a PHP-Parser type node to string.
-     */
-    private function formatType($typeNode): string
-    {
-        if (is_string($typeNode)) {
-            return $typeNode;
-        }
-
-        if ($typeNode instanceof \PhpParser\Node\Name) {
-            return $typeNode->toString();
-        }
-
-        if ($typeNode instanceof \PhpParser\Node\Identifier) {
-            return $typeNode->name;
-        }
-
-        if ($typeNode instanceof \PhpParser\Node\NullableType) {
-            return '?' . $this->formatType($typeNode->type);
-        }
-
-        if ($typeNode instanceof \PhpParser\Node\UnionType) {
-            return implode('|', array_map([$this, 'formatType'], $typeNode->types));
-        }
-
-        return 'mixed';
     }
 }
 
