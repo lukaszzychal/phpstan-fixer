@@ -142,5 +142,117 @@ final class ConfigurationTest extends TestCase
 
         $this->assertTrue($rule->isReport());
     }
+
+    public function testGetEnabledFixersReturnsEmptyArrayByDefault(): void
+    {
+        $config = new Configuration();
+
+        $this->assertSame([], $config->getEnabledFixers());
+    }
+
+    public function testGetEnabledFixersReturnsConfiguredList(): void
+    {
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            ['MissingReturnDocblockFixer', 'MissingParamDocblockFixer']
+        );
+
+        $enabled = $config->getEnabledFixers();
+
+        $this->assertCount(2, $enabled);
+        $this->assertContains('MissingReturnDocblockFixer', $enabled);
+        $this->assertContains('MissingParamDocblockFixer', $enabled);
+    }
+
+    public function testGetDisabledFixersReturnsEmptyArrayByDefault(): void
+    {
+        $config = new Configuration();
+
+        $this->assertSame([], $config->getDisabledFixers());
+    }
+
+    public function testGetDisabledFixersReturnsConfiguredList(): void
+    {
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            [],
+            ['UndefinedPivotPropertyFixer']
+        );
+
+        $disabled = $config->getDisabledFixers();
+
+        $this->assertCount(1, $disabled);
+        $this->assertContains('UndefinedPivotPropertyFixer', $disabled);
+    }
+
+    public function testGetFixerPriorityReturnsNullWhenNotConfigured(): void
+    {
+        $config = new Configuration();
+
+        $this->assertNull($config->getFixerPriority('MissingReturnDocblockFixer'));
+    }
+
+    public function testGetFixerPriorityReturnsConfiguredPriority(): void
+    {
+        $priorities = [
+            'MissingReturnDocblockFixer' => 100,
+            'MissingParamDocblockFixer' => 90,
+        ];
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            [],
+            [],
+            $priorities
+        );
+
+        $this->assertSame(100, $config->getFixerPriority('MissingReturnDocblockFixer'));
+        $this->assertSame(90, $config->getFixerPriority('MissingParamDocblockFixer'));
+    }
+
+    public function testIsFixerEnabledReturnsTrueWhenInEnabledList(): void
+    {
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            ['MissingReturnDocblockFixer']
+        );
+
+        $this->assertTrue($config->isFixerEnabled('MissingReturnDocblockFixer'));
+    }
+
+    public function testIsFixerEnabledReturnsFalseWhenInDisabledList(): void
+    {
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            ['MissingReturnDocblockFixer'],
+            ['MissingReturnDocblockFixer']
+        );
+
+        // Disabled takes precedence
+        $this->assertFalse($config->isFixerEnabled('MissingReturnDocblockFixer'));
+    }
+
+    public function testIsFixerEnabledReturnsTrueWhenNotInAnyList(): void
+    {
+        $config = new Configuration();
+
+        // If no enabled/disabled lists, all fixers are enabled by default
+        $this->assertTrue($config->isFixerEnabled('MissingReturnDocblockFixer'));
+    }
+
+    public function testIsFixerEnabledReturnsFalseWhenOnlyEnabledListExistsAndFixerNotInIt(): void
+    {
+        $config = new Configuration(
+            [],
+            new Rule(Rule::ACTION_FIX),
+            ['MissingParamDocblockFixer'] // Only this one enabled
+        );
+
+        $this->assertFalse($config->isFixerEnabled('MissingReturnDocblockFixer'));
+    }
 }
 
