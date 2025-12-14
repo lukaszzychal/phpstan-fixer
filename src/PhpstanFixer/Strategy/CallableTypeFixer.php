@@ -16,6 +16,7 @@ use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
+use PhpstanFixer\Strategy\FileValidationTrait;
 
 /**
  * Fixes callable type issues by adding proper callable invocation annotations.
@@ -25,6 +26,8 @@ use PhpstanFixer\Strategy\PriorityTrait;
 final class CallableTypeFixer implements FixStrategyInterface
 {
     use PriorityTrait;
+    use FileValidationTrait;
+
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
         private readonly DocblockManipulator $docblockManipulator
@@ -39,14 +42,12 @@ final class CallableTypeFixer implements FixStrategyInterface
 
     public function fix(Issue $issue, string $fileContent): FixResult
     {
-        if (!file_exists($issue->getFilePath())) {
-            return FixResult::failure($issue, $fileContent, 'File does not exist');
+        $validation = $this->validateFileAndParse($issue, $fileContent, $this->analyzer);
+        if ($validation instanceof FixResult) {
+            return $validation;
         }
 
-        $ast = $this->analyzer->parse($fileContent);
-        if ($ast === null) {
-            return FixResult::failure($issue, $fileContent, 'Could not parse file');
-        }
+        $ast = $validation['ast'];
 
         // Extract parameter information
         $paramInfo = $this->extractCallableParameterInfo($issue->getMessage());
