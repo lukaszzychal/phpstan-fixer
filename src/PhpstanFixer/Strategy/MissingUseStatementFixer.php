@@ -35,7 +35,11 @@ final class MissingUseStatementFixer implements FixStrategyInterface
     {
         return $issue->matchesPattern('/Class\s+[^\s]+\s+not found/i') ||
                $issue->matchesPattern('/Cannot resolve symbol/i') ||
-               $issue->matchesPattern('/Class.*does not exist/i');
+               $issue->matchesPattern('/Class.*does not exist/i') ||
+               $issue->matchesPattern('/Unknown class/i') ||
+               $issue->matchesPattern('/Class\s+[^\s]+\s+is undefined/i') ||
+               $issue->matchesPattern('/Instantiated class\s+[^\s]+\s+not found/i') ||
+               $issue->matchesPattern('/Referenced class\s+[^\s]+\s+not found/i');
     }
 
     public function fix(Issue $issue, string $fileContent): FixResult
@@ -158,6 +162,31 @@ final class MissingUseStatementFixer implements FixStrategyInterface
 
         // Pattern: "Class ClassName does not exist"
         if (preg_match("/Class\s+([\w\\\\]+)\s+does not exist/i", $message, $matches)) {
+            return $matches[1];
+        }
+
+        // Pattern: "Unknown class 'ClassName'"
+        if (preg_match("/Unknown class\s+['\"]?([\w\\\\]+)['\"]?/i", $message, $matches)) {
+            return $matches[1];
+        }
+
+        // Pattern: "Class ClassName is undefined"
+        if (preg_match("/Class\s+['\"]?([\w\\\\]+)['\"]?\s+is undefined/i", $message, $matches)) {
+            return $matches[1];
+        }
+
+        // Pattern: "Instantiated class 'ClassName' not found"
+        if (preg_match("/Instantiated class\s+['\"]?([\w\\\\]+)['\"]?\s+not found/i", $message, $matches)) {
+            return $matches[1];
+        }
+
+        // Pattern: "Referenced class 'ClassName' not found"
+        if (preg_match("/Referenced class\s+['\"]?([\w\\\\]+)['\"]?\s+not found/i", $message, $matches)) {
+            return $matches[1];
+        }
+
+        // Pattern: "Cannot resolve symbol 'ClassName'"
+        if (preg_match("/Cannot resolve symbol\s+['\"]?([\w\\\\]+)['\"]?/i", $message, $matches)) {
             return $matches[1];
         }
 
