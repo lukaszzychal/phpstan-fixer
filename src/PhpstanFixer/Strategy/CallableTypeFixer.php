@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace PhpstanFixer\Strategy;
 
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
+use PhpstanFixer\CodeAnalysis\ErrorMessageParser;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
@@ -165,17 +166,17 @@ final class CallableTypeFixer implements FixStrategyInterface
      */
     private function extractCallableParameterInfo(string $message): ?array
     {
-        // Pattern: "Parameter #1 $callback expects callable"
-        if (preg_match('/Parameter\s+#\d+\s+\$(\w+).*callable/i', $message, $matches)) {
-            return ['name' => $matches[1]];
+        // Check if message contains "callable"
+        if (!preg_match('/callable/i', $message)) {
+            return null;
         }
 
-        // Pattern: "Parameter $callback expects callable"
-        if (preg_match('/Parameter\s+\$(\w+).*callable/i', $message, $matches)) {
-            return ['name' => $matches[1]];
+        $paramName = ErrorMessageParser::parseParameterName($message);
+        if ($paramName === null) {
+            return null;
         }
 
-        return null;
+        return ['name' => $paramName];
     }
 }
 

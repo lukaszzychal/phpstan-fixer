@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace PhpstanFixer\Strategy;
 
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
+use PhpstanFixer\CodeAnalysis\ErrorMessageParser;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\CodeAnalysis\TypeInference;
 use PhpstanFixer\FixResult;
@@ -158,23 +159,17 @@ final class MissingParamDocblockFixer implements FixStrategyInterface
      */
     private function extractParameterInfo(string $message): ?array
     {
-        // Pattern: "Parameter #1 $name has no type specified"
-        if (preg_match('/Parameter\s+#(\d+)\s+\$(\w+)/i', $message, $matches)) {
-            return [
-                'position' => (int) $matches[1] - 1, // Convert to 0-based
-                'name' => $matches[2],
-            ];
+        $paramName = ErrorMessageParser::parseParameterName($message);
+        if ($paramName === null) {
+            return null;
         }
 
-        // Pattern: "Parameter $name has no type specified"
-        if (preg_match('/Parameter\s+\$(\w+)/i', $message, $matches)) {
-            return [
-                'position' => 0, // Default to first parameter
-                'name' => $matches[1],
-            ];
-        }
+        $paramIndex = ErrorMessageParser::parseParameterIndex($message);
 
-        return null;
+        return [
+            'position' => $paramIndex ?? 0, // Use parsed index or default to 0
+            'name' => $paramName,
+        ];
     }
 
     /**

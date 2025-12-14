@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace PhpstanFixer\Strategy;
 
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
+use PhpstanFixer\CodeAnalysis\ErrorMessageParser;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
@@ -53,7 +54,8 @@ final class IterableValueTypeFixer implements FixStrategyInterface
         }
 
         $targetLine = $issue->getLine();
-        $paramName = $this->extractParamName($issue->getMessage());
+        $paramNameFromMessage = ErrorMessageParser::parseParameterName($issue->getMessage());
+        $paramName = $paramNameFromMessage !== null ? '$' . $paramNameFromMessage : null;
 
         // Find function/method at this line (with tolerance of 5 lines)
         $located = $this->findFunctionOrMethodAtLine($ast, $targetLine, $this->analyzer, 5);
@@ -131,14 +133,6 @@ final class IterableValueTypeFixer implements FixStrategyInterface
         return 'IterableValueTypeFixer';
     }
 
-    private function extractParamName(string $message): ?string
-    {
-        if (preg_match('/\\$(\\w+)/', $message, $matches)) {
-            return '$' . $matches[1];
-        }
-
-        return null;
-    }
 
     private function replaceIterableWithGeneric(string $docblockContent, string $paramName): string
     {
