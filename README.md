@@ -133,6 +133,8 @@ default:
 - **`ignore`** - Don't fix and don't display the error (silent ignore)
 - **`report`** - Don't fix, but display in original PHPStan format
 
+Validation: configuration is validated on load. Invalid actions (anything other than `fix`, `ignore`, `report`) or malformed rule entries will stop execution with a clear error message.
+
 **Using Configuration:**
 
 ```bash

@@ -168,20 +168,15 @@ final class ConfigurationLoader
         $rules = [];
         $defaultAction = Rule::ACTION_FIX;
 
+        if (isset($data['rules']) && !is_array($data['rules'])) {
+            throw new \RuntimeException('Configuration "rules" must be an object/map.');
+        }
+
         // Parse rules
         if (isset($data['rules']) && is_array($data['rules'])) {
             foreach ($data['rules'] as $pattern => $ruleData) {
-                if (is_string($ruleData)) {
-                    // Simple format: "pattern": "action"
-                    $action = $ruleData;
-                } elseif (is_array($ruleData) && isset($ruleData['action'])) {
-                    // Full format: "pattern": { "action": "fix" }
-                    $action = $ruleData['action'];
-                } else {
-                    continue;
-                }
-
-                $rules[$pattern] = new Rule($action);
+                $action = $this->extractAction($pattern, $ruleData);
+                $rules[$pattern] = $this->createRule($pattern, $action);
             }
         }
 
@@ -191,10 +186,52 @@ final class ConfigurationLoader
                 $defaultAction = $data['default'];
             } elseif (is_array($data['default']) && isset($data['default']['action'])) {
                 $defaultAction = $data['default']['action'];
+            } else {
+                throw new \RuntimeException('Configuration "default" must be a string action or object with action.');
             }
         }
 
-        return new Configuration($rules, new Rule($defaultAction));
+        return new Configuration($rules, $this->createRule('default', $defaultAction));
+    }
+
+    /**
+     * @param mixed $ruleData
+     */
+    private function extractAction(string $pattern, mixed $ruleData): string
+    {
+        if (is_string($ruleData)) {
+            return $ruleData;
+        }
+
+        if (is_array($ruleData) && array_key_exists('action', $ruleData)) {
+            if (!is_string($ruleData['action'])) {
+                throw new \RuntimeException(sprintf(
+                    'Invalid action type for pattern "%s": expected string',
+                    $pattern
+                ));
+            }
+
+            return $ruleData['action'];
+        }
+
+        throw new \RuntimeException(sprintf(
+            'Rule for pattern "%s" must be a string action or object with "action"',
+            $pattern
+        ));
+    }
+
+    private function createRule(string $pattern, string $action): Rule
+    {
+        try {
+            return new Rule($action);
+        } catch (\InvalidArgumentException $exception) {
+            throw new \RuntimeException(sprintf(
+                'Invalid action "%s" for pattern "%s". Allowed: %s',
+                $action,
+                $pattern,
+                implode(', ', [Rule::ACTION_FIX, Rule::ACTION_IGNORE, Rule::ACTION_REPORT])
+            ), 0, $exception);
+        }
     }
 }
 
