@@ -5,9 +5,12 @@ parameters:
         - tests
     excludePaths:
         - tests/Fixtures
+    # Baseline will be added when needed: baseline: phpstan-baseline.neon
     ignoreErrors:
-        - '#Call to method.*assertIsArray\(\) with array.*will always evaluate to true#'
-        - '#Call to method.*assertIsBool\(\) with bool will always evaluate to true#'
-        - '#Call to method.*assertIsString\(\) with string will always evaluate to true#'
-        - '#Unreachable statement - code above always terminates#'
+        # PHPUnit assertion false positives (more specific patterns)
+        - '#Call to method PHPUnit\\\\Framework\\\\Assert::assertIs(Array|Bool|String|Int|Float)\(\) with (array|bool|string|int|float) will always evaluate to true#'
+        
+        # Unreachable statement false positives (can occur in tests and src with conditional logic)
+        - '#Unreachable statement - code above always terminates\.#'
+    
     reportUnmatchedIgnoredErrors: false

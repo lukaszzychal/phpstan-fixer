@@ -1,0 +1,16 @@
+# PHPStan Baseline Example
+#
+# This file demonstrates the baseline structure. Generate actual baseline with:
+# vendor/bin/phpstan analyse src tests --level=5 --generate-baseline
+#
+# Then uncomment the baseline line in phpstan.neon:
+# baseline: phpstan-baseline.neon
+
+parameters:
+    ignoreErrors:
+        # Example baseline entries (will be auto-generated)
+        # -
+        #     message: '#Call to method.*may not exist#'
+        #     path: src/SomeFile.php
+        #     count: 1
+
