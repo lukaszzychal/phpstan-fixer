@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace PhpstanFixer\Strategy;
 
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
+use PhpstanFixer\CodeAnalysis\ErrorMessageParser;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
@@ -50,7 +51,7 @@ final class MissingThrowsDocblockFixer implements FixStrategyInterface
         $ast = $validation['ast'];
 
         // Extract exception type from error message
-        $exceptionType = $this->extractExceptionType($issue->getMessage());
+        $exceptionType = ErrorMessageParser::parseExceptionType($issue->getMessage());
         if ($exceptionType === null) {
             $exceptionType = '\\Exception'; // Default fallback
         }
@@ -153,17 +154,5 @@ final class MissingThrowsDocblockFixer implements FixStrategyInterface
         return 'MissingThrowsDocblockFixer';
     }
 
-    /**
-     * Extract exception type from error message.
-     */
-    private function extractExceptionType(string $message): ?string
-    {
-        // Pattern: "throws ExceptionType but @throws annotation is missing"
-        if (preg_match('/throws\s+([\\\\\w]+)/i', $message, $matches)) {
-            return $matches[1];
-        }
-
-        return null;
-    }
 }
 

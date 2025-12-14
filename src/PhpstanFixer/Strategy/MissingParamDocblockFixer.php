@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace PhpstanFixer\Strategy;
 
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
+use PhpstanFixer\CodeAnalysis\ErrorMessageParser;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\CodeAnalysis\TypeInference;
 use PhpstanFixer\FixResult;
@@ -19,6 +20,7 @@ use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
 use PhpstanFixer\Strategy\TypeFormatterTrait;
 use PhpstanFixer\Strategy\FileValidationTrait;
+use PhpstanFixer\Strategy\FunctionLocatorTrait;
 
 /**
  * Fixes missing parameter type annotations by adding @param mixed.
@@ -30,6 +32,7 @@ final class MissingParamDocblockFixer implements FixStrategyInterface
     use PriorityTrait;
     use TypeFormatterTrait;
     use FileValidationTrait;
+    use FunctionLocatorTrait;
     private TypeInference $typeInference;
 
     public function __construct(
@@ -62,35 +65,10 @@ final class MissingParamDocblockFixer implements FixStrategyInterface
         $targetLine = $issue->getLine();
         $lines = explode("\n", $fileContent);
 
-        // Find function/method at this line
-        $functions = $this->analyzer->getFunctions($ast);
-        $classes = $this->analyzer->getClasses($ast);
-
-        $targetFunction = null;
-        $targetMethod = null;
-
-        // Check functions first
-        foreach ($functions as $function) {
-            $functionLine = $this->analyzer->getNodeLine($function);
-            if ($functionLine === $targetLine || abs($functionLine - $targetLine) <= 5) {
-                $targetFunction = $function;
-                break;
-            }
-        }
-
-        // Check methods in classes
-        if ($targetFunction === null) {
-            foreach ($classes as $class) {
-                $methods = $this->analyzer->getMethods($class);
-                foreach ($methods as $method) {
-                    $methodLine = $this->analyzer->getNodeLine($method);
-                    if ($methodLine === $targetLine || abs($methodLine - $targetLine) <= 5) {
-                        $targetMethod = $method;
-                        break 2;
-                    }
-                }
-            }
-        }
+        // Find function/method at this line (with tolerance of 5 lines)
+        $located = $this->findFunctionOrMethodAtLine($ast, $targetLine, $this->analyzer, 5);
+        $targetFunction = $located['function'];
+        $targetMethod = $located['method'];
 
         if ($targetFunction === null && $targetMethod === null) {
             return FixResult::failure($issue, $fileContent, 'Could not find function/method near specified line');
@@ -181,23 +159,17 @@ final class MissingParamDocblockFixer implements FixStrategyInterface
      */
     private function extractParameterInfo(string $message): ?array
     {
-        // Pattern: "Parameter #1 $name has no type specified"
-        if (preg_match('/Parameter\s+#(\d+)\s+\$(\w+)/i', $message, $matches)) {
-            return [
-                'position' => (int) $matches[1] - 1, // Convert to 0-based
-                'name' => $matches[2],
-            ];
+        $paramName = ErrorMessageParser::parseParameterName($message);
+        if ($paramName === null) {
+            return null;
         }
 
-        // Pattern: "Parameter $name has no type specified"
-        if (preg_match('/Parameter\s+\$(\w+)/i', $message, $matches)) {
-            return [
-                'position' => 0, // Default to first parameter
-                'name' => $matches[1],
-            ];
-        }
+        $paramIndex = ErrorMessageParser::parseParameterIndex($message);
 
-        return null;
+        return [
+            'position' => $paramIndex ?? 0, // Use parsed index or default to 0
+            'name' => $paramName,
+        ];
     }
 
     /**

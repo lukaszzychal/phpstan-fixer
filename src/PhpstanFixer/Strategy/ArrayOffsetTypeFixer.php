@@ -12,11 +12,13 @@ declare(strict_types=1);
 namespace PhpstanFixer\Strategy;
 
 use PhpstanFixer\CodeAnalysis\DocblockManipulator;
+use PhpstanFixer\CodeAnalysis\ErrorMessageParser;
 use PhpstanFixer\CodeAnalysis\PhpFileAnalyzer;
 use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
 use PhpstanFixer\Strategy\FileValidationTrait;
+use PhpstanFixer\Strategy\FunctionLocatorTrait;
 
 /**
  * Adds array generics (array<int, mixed>) when PHPStan reports unknown array offset types.
@@ -27,6 +29,7 @@ final class ArrayOffsetTypeFixer implements FixStrategyInterface
 {
     use PriorityTrait;
     use FileValidationTrait;
+    use FunctionLocatorTrait;
 
     public function __construct(
         private readonly PhpFileAnalyzer $analyzer,
@@ -50,34 +53,13 @@ final class ArrayOffsetTypeFixer implements FixStrategyInterface
 
         $ast = $validation['ast'];
         $targetLine = $issue->getLine();
-        $paramName = $this->extractParamName($issue->getMessage());
+        $paramNameFromMessage = ErrorMessageParser::parseParameterName($issue->getMessage());
+        $paramName = $paramNameFromMessage !== null ? '$' . $paramNameFromMessage : null;
 
-        $functions = $this->analyzer->getFunctions($ast);
-        $classes = $this->analyzer->getClasses($ast);
-
-        $targetFunction = null;
-        $targetMethod = null;
-
-        foreach ($functions as $function) {
-            $functionLine = $this->analyzer->getNodeLine($function);
-            if ($functionLine === $targetLine || abs($functionLine - $targetLine) <= 5) {
-                $targetFunction = $function;
-                break;
-            }
-        }
-
-        if ($targetFunction === null) {
-            foreach ($classes as $class) {
-                $methods = $this->analyzer->getMethods($class);
-                foreach ($methods as $method) {
-                    $methodLine = $this->analyzer->getNodeLine($method);
-                    if ($methodLine === $targetLine || abs($methodLine - $targetLine) <= 5) {
-                        $targetMethod = $method;
-                        break 2;
-                    }
-                }
-            }
-        }
+        // Find function/method at this line (with tolerance of 5 lines)
+        $located = $this->findFunctionOrMethodAtLine($ast, $targetLine, $this->analyzer, 5);
+        $targetFunction = $located['function'];
+        $targetMethod = $located['method'];
 
         $targetNode = $targetFunction ?? $targetMethod;
         if ($targetNode === null) {
@@ -161,14 +143,6 @@ final class ArrayOffsetTypeFixer implements FixStrategyInterface
         return 'ArrayOffsetTypeFixer';
     }
 
-    private function extractParamName(string $message): ?string
-    {
-        if (preg_match('/\\$(\\w+)/', $message, $matches)) {
-            return '$' . $matches[1];
-        }
-
-        return null;
-    }
 
     private function replaceParamArrayWithGeneric(string $docblockContent, string $paramName): string
     {

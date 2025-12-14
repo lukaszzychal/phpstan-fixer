@@ -42,6 +42,7 @@ trait TypeFormatterTrait
             return '?' . $this->formatType($typeNode->type);
         }
 
+        // @phpstan-ignore-next-line - false positive: $typeNode is a union type, instanceof check is valid
         if ($typeNode instanceof \PhpParser\Node\UnionType) {
             return implode('|', array_map([$this, 'formatType'], $typeNode->types));
         }

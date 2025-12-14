@@ -18,6 +18,7 @@ use PhpstanFixer\FixResult;
 use PhpstanFixer\Issue;
 use PhpstanFixer\Strategy\PriorityTrait;
 use PhpstanFixer\Strategy\TypeFormatterTrait;
+use PhpstanFixer\Strategy\FunctionLocatorTrait;
 
 /**
  * Fixes missing return type annotations by adding @return mixed.
@@ -29,6 +30,7 @@ final class MissingReturnDocblockFixer implements FixStrategyInterface
     use PriorityTrait;
     use TypeFormatterTrait;
     use FileValidationTrait;
+    use FunctionLocatorTrait;
     private TypeInference $typeInference;
 
     public function __construct(
@@ -55,34 +57,9 @@ final class MissingReturnDocblockFixer implements FixStrategyInterface
         $lines = explode("\n", $fileContent);
 
         // Find function/method at this line
-        $functions = $this->analyzer->getFunctions($ast);
-        $classes = $this->analyzer->getClasses($ast);
-
-        $targetFunction = null;
-        $targetMethod = null;
-
-        // Check functions first
-        foreach ($functions as $function) {
-            $functionLine = $this->analyzer->getNodeLine($function);
-            if ($functionLine === $targetLine) {
-                $targetFunction = $function;
-                break;
-            }
-        }
-
-        // Check methods in classes
-        if ($targetFunction === null) {
-            foreach ($classes as $class) {
-                $methods = $this->analyzer->getMethods($class);
-                foreach ($methods as $method) {
-                    $methodLine = $this->analyzer->getNodeLine($method);
-                    if ($methodLine === $targetLine) {
-                        $targetMethod = $method;
-                        break 2;
-                    }
-                }
-            }
-        }
+        $located = $this->findFunctionOrMethodAtLine($ast, $targetLine, $this->analyzer, 0);
+        $targetFunction = $located['function'];
+        $targetMethod = $located['method'];
 
         if ($targetFunction === null && $targetMethod === null) {
             return FixResult::failure($issue, $fileContent, 'Could not find function/method at specified line');
